@@ -6,6 +6,8 @@ import json
 from PIL import Image
 import io
 import os
+import time
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -14,10 +16,14 @@ CORS(app)
 BUCKET = "object-detection-uploads-v1"
 ENDPOINT = "jumpstart-dft-mobilenet-v2-fpnlite-20260403-130823"
 REGION = "eu-west-1"
+DYNAMODB_TABLE = "detection-result"
 
 # AWS CLIENTS
 s3 = boto3.client('s3', region_name=REGION)
 runtime = boto3.client('sagemaker-runtime', region_name=REGION)
+dynamodb = boto3.resource('dynamodb', region_name=REGION)
+table = dynamodb.Table(DYNAMODB_TABLE)
+bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
 
 # Serve frontend
 @app.route('/')
@@ -38,12 +44,78 @@ def serve_static(path):
 def health():
     return jsonify({"status": "healthy"})
 
+# Get scene description from Bedrock
+def get_scene_description(detections):
+    try:
+        if not detections or len(detections) == 0:
+            return None
+        
+        # Format detected objects
+        objects = ', '.join([f"{d['name']} ({d['confidence']}%)" for d in detections])
+        prompt = f"An object detection model found these objects in an image: {objects}. Write one short sentence describing what the scene likely shows."
+        
+        # Call Bedrock Nova Micro
+        response = bedrock.invoke_model(
+            modelId='amazon.nova-micro-v1:0',
+            body=json.dumps({
+                "messages": [{"role": "user", "content": [{"text": prompt}]}],
+                "inferenceConfig": {"maxTokens": 80, "temperature": 0.5}
+            })
+        )
+        
+        result = json.loads(response['body'].read())
+        return result['output']['message']['content'][0]['text'].strip()
+    except Exception as e:
+        print(f"[Bedrock] Error: {e}")
+        return None
+
+# Save detections to DynamoDB
+def save_detections(detections, uploader_name, inference_ms, scene_description):
+    try:
+        timestamp = datetime.utcnow().isoformat()
+        for det in detections:
+            table.put_item(Item={
+                'id': str(uuid.uuid4()),
+                'timestamp': timestamp,
+                'object_name': det['name'],
+                'confidence': str(round(det['confidence'], 2)),
+                'inference_ms': str(round(inference_ms, 2)),
+                'uploader_name': uploader_name or 'Anonymous',
+                'scene_description': scene_description or '',
+                'source': 'web-upload'
+            })
+    except Exception as e:
+        print(f"[DynamoDB] Error: {e}")
+
+# Get analytics from DynamoDB
+@app.route('/analytics', methods=['GET'])
+def get_analytics():
+    try:
+        response = table.scan()
+        items = response.get('Items', [])
+        
+        # Sort by timestamp descending
+        items.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        
+        return jsonify({
+            "status": "success",
+            "records": items
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        })
+
 # UPLOAD + DETECTION API
 @app.route('/upload', methods=['POST'])
 def upload():
     try:
-        # Get file
+        start_time = time.time()
+        
+        # Get file and uploader name
         file = request.files['file']
+        uploader_name = request.form.get('uploader_name', 'Anonymous')
         image_id = str(uuid.uuid4())
         
         # Convert and resize image
@@ -58,7 +130,7 @@ def upload():
         image.save(buffer, format="JPEG", quality=85)
         image_bytes = buffer.getvalue()
         
-        # Upload original to S3
+        # Upload to S3
         s3.put_object(
             Bucket=BUCKET,
             Key=image_id,
@@ -66,7 +138,7 @@ def upload():
             ContentType='image/jpeg'
         )
         
-        # Call SageMaker endpoint with resized image
+        # Call SageMaker endpoint
         response = runtime.invoke_endpoint(
             EndpointName=ENDPOINT,
             ContentType='application/x-image',
@@ -74,18 +146,39 @@ def upload():
         )
         
         result = response['Body'].read().decode()
+        parsed_result = json.loads(result)
         
-        # Parse JSON safely
-        try:
-            parsed_result = json.loads(result)
-        except:
-            parsed_result = result
+        inference_ms = (time.time() - start_time) * 1000
+        
+        # Format detections
+        classes = parsed_result.get('classes', [])
+        scores = parsed_result.get('scores', [])
+        
+        detections = []
+        for i, (cls, score) in enumerate(zip(classes, scores)):
+            if score > 0.3:  # Filter low confidence
+                detections.append({
+                    'name': get_coco_label(int(cls)),
+                    'confidence': round(float(score) * 100, 1)
+                })
+        
+        # Get top 10 detections
+        detections.sort(key=lambda x: x['confidence'], reverse=True)
+        detections = detections[:10]
+        
+        # Get scene description from Bedrock
+        scene_description = get_scene_description(detections)
+        
+        # Save to DynamoDB
+        save_detections(detections, uploader_name, inference_ms, scene_description)
         
         return jsonify({
             "status": "success",
             "image_id": image_id,
             "s3_url": f"https://{BUCKET}.s3.amazonaws.com/{image_id}",
-            "detections": parsed_result
+            "detections": detections,
+            "inference_ms": round(inference_ms, 1),
+            "scene_description": scene_description
         })
         
     except Exception as e:
@@ -93,6 +186,14 @@ def upload():
             "status": "error",
             "message": str(e)
         })
+
+# COCO class names
+COCO_CLASSES = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+
+def get_coco_label(idx):
+    if 0 <= idx < len(COCO_CLASSES):
+        return COCO_CLASSES[idx]
+    return 'unknown'
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)

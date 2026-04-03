@@ -29,17 +29,39 @@
     .det-row { display: flex; flex-wrap: wrap; gap: 8px; min-height: 28px; }
     .pill { background: #1e1b4b; border: 1px solid #4338ca; border-radius: 999px; padding: 3px 12px; font-size: 0.82rem; color: #a5b4fc; }
     .stats-row { display: flex; gap: 16px; font-size: 0.78rem; color: #555; }
-    .btn-row { display: flex; gap: 10px; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
     button { padding: 10px 28px; border-radius: 8px; border: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.15s; }
     #btn-detect { background: #7c3aed; color: #fff; }
     #btn-detect:hover { background: #6d28d9; }
     #btn-detect:disabled { background: #2d1b6b; color: #555; cursor: default; }
     #btn-clear { background: #374151; color: #ccc; }
     #btn-clear:hover { background: #4b5563; }
+    #btn-refresh { background: #065f46; color: #6ee7b7; }
+    #btn-refresh:hover { background: #047857; }
     #upload-status { font-size: 0.85rem; color: #555; }
     #upload-status.loading { color: #facc15; }
     #upload-status.done { color: #4ade80; }
     #upload-status.error { color: #f87171; }
+    #bedrock-box { display: none; background: #0c1a2e; border: 1px solid #1e3a5f; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #93c5fd; line-height: 1.6; }
+    .bedrock-label { font-size: 0.75rem; color: #60a5fa; font-weight: 500; display: block; margin-bottom: 4px; }
+    
+    /* Analytics styles */
+    .analytics-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .analytics-title { font-size: 1rem; font-weight: 500; color: #ccc; }
+    .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
+    .stat-card { background: #111; border-radius: 8px; padding: 16px; border: 1px solid #1f2937; }
+    .stat-label { font-size: 0.75rem; color: #555; margin-bottom: 4px; }
+    .stat-value { font-size: 1.4rem; font-weight: 600; color: #93c5fd; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { background: #111; color: #6b7280; font-weight: 500; padding: 10px 12px; text-align: left; border-bottom: 1px solid #1f2937; }
+    td { padding: 10px 12px; border-bottom: 1px solid #111; color: #d1d5db; }
+    tr:hover td { background: #1f2937; }
+    .obj-pill { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #1e1b4b; color: #a5b4fc; font-size: 0.78rem; }
+    .conf-bar { display: flex; align-items: center; gap: 8px; }
+    .conf-fill { height: 6px; border-radius: 3px; background: #2563eb; min-width: 4px; }
+    #analytics-status { font-size: 0.82rem; color: #555; text-align: center; padding: 24px; }
+    
+    /* Architecture styles */
     .arch-section { display: flex; flex-direction: column; gap: 8px; }
     .arch-title { font-size: 0.95rem; font-weight: 600; color: #93c5fd; border-bottom: 1px solid #1f2937; padding-bottom: 8px; }
     .arch-text { font-size: 0.85rem; color: #9ca3af; line-height: 1.7; }
@@ -61,10 +83,11 @@
 </head>
 <body>
   <h1>CS5024: Object Detection <span class="badge">GenAI + AWS</span></h1>
-  <p class="subtitle">Powered by EC2, S3, CloudFront, and SageMaker</p>
+  <p class="subtitle">Powered by EC2, S3, SageMaker, DynamoDB & Bedrock</p>
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('detect')">Detect objects</button>
+    <button class="tab" onclick="switchTab('analytics')">Analytics</button>
     <button class="tab" onclick="switchTab('architecture')">Architecture</button>
   </div>
 
@@ -88,6 +111,10 @@
         <img id="upload-preview" alt="preview">
       </div>
       <div class="det-row" id="det-pills"></div>
+      <div id="bedrock-box">
+        <span class="bedrock-label">Amazon Bedrock — Nova Micro</span>
+        <span id="bedrock-text"></span>
+      </div>
       <div class="stats-row">
         <span id="inf-time"></span>
         <span id="det-count"></span>
@@ -100,13 +127,40 @@
     </div>
   </div>
 
+  <!-- Analytics panel -->
+  <div class="panel" id="panel-analytics">
+    <div class="card">
+      <div class="analytics-header">
+        <span class="analytics-title">Detection History — DynamoDB</span>
+        <button id="btn-refresh" onclick="loadAnalytics()">Refresh</button>
+      </div>
+      <div class="stat-cards" id="stat-cards"></div>
+      <div style="overflow-x:auto">
+        <table id="analytics-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Object</th>
+              <th>Confidence</th>
+              <th>Inference</th>
+              <th>Uploader</th>
+              <th>Scene Description</th>
+            </tr>
+          </thead>
+          <tbody id="analytics-body"></tbody>
+        </table>
+      </div>
+      <div id="analytics-status">Click Refresh to load detection history</div>
+    </div>
+  </div>
+
   <!-- Architecture panel -->
   <div class="panel" id="panel-architecture">
     <div class="card">
       <div class="arch-section">
         <div class="arch-title">System Architecture</div>
         <div class="arch-text">
-          This object detection system uses a serverless AWS architecture with automated CI/CD deployment through GitHub Actions.
+          This object detection system uses AWS services with automated CI/CD deployment through GitHub Actions.
         </div>
       </div>
 
@@ -119,15 +173,19 @@
           </div>
           <div class="service-card">
             <div class="service-name">Amazon S3</div>
-            <div class="service-role">Image storage & static hosting</div>
+            <div class="service-role">Image storage</div>
           </div>
           <div class="service-card">
             <div class="service-name">Amazon SageMaker</div>
             <div class="service-role">MobileNet v2 FPN-Lite inference</div>
           </div>
           <div class="service-card">
-            <div class="service-name">CloudFront (Planned)</div>
-            <div class="service-role">Global CDN distribution</div>
+            <div class="service-name">Amazon DynamoDB</div>
+            <div class="service-role">Detection results storage</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">Amazon Bedrock</div>
+            <div class="service-role">Nova Micro scene descriptions</div>
           </div>
           <div class="service-card">
             <div class="service-name">IAM Roles</div>
@@ -148,19 +206,23 @@
         </div>
         <div class="flow-step">
           <div class="flow-num">2</div>
-          <div class="flow-text"><strong>CloudFront</strong> serves static frontend from S3</div>
-        </div>
-        <div class="flow-step">
-          <div class="flow-num">3</div>
           <div class="flow-text"><strong>Flask API on EC2</strong> receives image, resizes it, and stores in S3</div>
         </div>
         <div class="flow-step">
-          <div class="flow-num">4</div>
+          <div class="flow-num">3</div>
           <div class="flow-text"><strong>SageMaker endpoint</strong> processes image using MobileNet v2 FPN-Lite model</div>
         </div>
         <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-text"><strong>Bedrock Nova Micro</strong> generates natural language scene description</div>
+        </div>
+        <div class="flow-step">
           <div class="flow-num">5</div>
-          <div class="flow-text"><strong>Detection results</strong> returned to frontend with bounding boxes and confidence scores</div>
+          <div class="flow-text"><strong>DynamoDB</strong> stores detection results for analytics</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">6</div>
+          <div class="flow-text"><strong>Results returned</strong> to frontend with detections and AI description</div>
         </div>
       </div>
 
@@ -174,7 +236,8 @@
           <span class="tag">PIL/Pillow</span>
           <span class="tag">JavaScript ES6</span>
           <span class="tag amber">GitHub Actions CI/CD</span>
-          <span class="tag amber">SSH Deployment</span>
+          <span class="tag amber">DynamoDB NoSQL</span>
+          <span class="tag amber">Bedrock Nova Micro</span>
         </div>
       </div>
 
@@ -187,15 +250,18 @@
 
   <script>
     const API_URL = 'http://54.74.221.183:8000';
-    
     let currentFile = null;
-    const COCO_CLASSES = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'];
 
     function switchTab(tab) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       event.target.classList.add('active');
       document.getElementById('panel-' + tab).classList.add('active');
+      
+      // Load analytics when switching to analytics tab
+      if (tab === 'analytics') {
+        loadAnalytics();
+      }
     }
 
     function handleDrop(e) {
@@ -231,13 +297,12 @@
       document.getElementById('upload-status').textContent = 'Analyzing image...';
       document.getElementById('upload-status').className = 'loading';
       document.getElementById('det-pills').innerHTML = '';
+      document.getElementById('bedrock-box').style.display = 'none';
 
       try {
-        // Resize image client-side
-        const resizedFile = await resizeImage(currentFile, 800);
-        
         const formData = new FormData();
-        formData.append('file', resizedFile);
+        formData.append('file', currentFile);
+        formData.append('uploader_name', document.getElementById('uploader-name').value || 'Anonymous');
 
         const response = await fetch(API_URL + '/upload', {
           method: 'POST',
@@ -247,34 +312,28 @@
         if (!response.ok) throw new Error('HTTP ' + response.status);
         
         const data = await response.json();
-        const inferenceTime = Date.now() - startTime;
 
         if (data.status === 'success') {
-          const detections = data.detections;
-          const classes = detections.classes || [];
-          const scores = detections.scores || [];
+          const detections = data.detections || [];
           
-          // Filter and format detections
-          const validDetections = classes
-            .map((cls, i) => ({
-              name: COCO_CLASSES[Math.floor(cls)] || 'unknown',
-              confidence: (scores[i] * 100).toFixed(1)
-            }))
-            .filter(d => parseFloat(d.confidence) > 30)
-            .sort((a, b) => parseFloat(b.confidence) - parseFloat(a.confidence))
-            .slice(0, 10); // Top 10
-
-          if (validDetections.length > 0) {
-            document.getElementById('det-pills').innerHTML = validDetections
+          if (detections.length > 0) {
+            document.getElementById('det-pills').innerHTML = detections
               .map(d => `<span class="pill">${d.name} ${d.confidence}%</span>`)
               .join('');
-            document.getElementById('det-count').textContent = `Objects found: ${validDetections.length}`;
+            document.getElementById('det-count').textContent = `Objects found: ${detections.length}`;
           } else {
-            document.getElementById('det-pills').innerHTML = '<span style="color:#666">No objects detected with high confidence</span>';
+            document.getElementById('det-pills').innerHTML = '<span style="color:#666">No objects detected</span>';
             document.getElementById('det-count').textContent = 'Objects found: 0';
           }
 
-          document.getElementById('inf-time').textContent = `Inference: ${inferenceTime}ms`;
+          document.getElementById('inf-time').textContent = `Inference: ${data.inference_ms}ms`;
+          
+          // Show Bedrock description
+          if (data.scene_description) {
+            document.getElementById('bedrock-text').textContent = data.scene_description;
+            document.getElementById('bedrock-box').style.display = 'block';
+          }
+          
           document.getElementById('upload-status').textContent = 'Detection complete!';
           document.getElementById('upload-status').className = 'done';
         } else {
@@ -286,44 +345,6 @@
       } finally {
         document.getElementById('btn-detect').disabled = false;
       }
-    }
-
-    function resizeImage(file, maxSize) {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-            
-            if (width > height) {
-              if (width > maxSize) {
-                height *= maxSize / width;
-                width = maxSize;
-              }
-            } else {
-              if (height > maxSize) {
-                width *= maxSize / height;
-                height = maxSize;
-              }
-            }
-            
-            canvas.width = width;
-            canvas.height = height;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            canvas.toBlob((blob) => {
-              resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-            }, 'image/jpeg', 0.85);
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
     }
 
     function clearAll() {
@@ -338,6 +359,63 @@
       document.getElementById('det-count').textContent = '';
       document.getElementById('upload-status').textContent = 'Choose an image to begin';
       document.getElementById('upload-status').className = '';
+      document.getElementById('bedrock-box').style.display = 'none';
+    }
+
+    async function loadAnalytics() {
+      document.getElementById('analytics-status').textContent = 'Loading from DynamoDB...';
+      document.getElementById('analytics-table').style.display = 'none';
+      document.getElementById('stat-cards').innerHTML = '';
+      
+      try {
+        const response = await fetch(API_URL + '/analytics');
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        
+        const data = await response.json();
+        const records = data.records || [];
+        
+        if (records.length === 0) {
+          document.getElementById('analytics-status').textContent = 'No detections recorded yet.';
+          return;
+        }
+        
+        // Calculate stats
+        const total = records.length;
+        const avgInf = (records.reduce((s, r) => s + parseFloat(r.inference_ms || 0), 0) / total).toFixed(1);
+        const avgConf = (records.reduce((s, r) => s + parseFloat(r.confidence || 0), 0) / total).toFixed(1);
+        const objCounts = {};
+        records.forEach(r => objCounts[r.object_name] = (objCounts[r.object_name] || 0) + 1);
+        const topObj = Object.entries(objCounts).sort((a, b) => b[1] - a[1])[0];
+        
+        // Display stats
+        document.getElementById('stat-cards').innerHTML = [
+          { label: 'Total detections', value: total },
+          { label: 'Unique objects', value: Object.keys(objCounts).length },
+          { label: 'Avg confidence', value: avgConf + '%' },
+          { label: 'Avg inference', value: avgInf + 'ms' },
+          { label: 'Most detected', value: topObj ? topObj[0] : '-' }
+        ].map(s => `<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
+        
+        // Display table
+        const tbody = document.getElementById('analytics-body');
+        tbody.innerHTML = records.map(r => {
+          const ts = r.timestamp ? r.timestamp.replace('T', ' ').substring(0, 19) : '-';
+          const conf = parseFloat(r.confidence || 0);
+          return `<tr>
+            <td>${ts}</td>
+            <td><span class="obj-pill">${r.object_name || '-'}</span></td>
+            <td><div class="conf-bar"><div class="conf-fill" style="width:${Math.round(conf)}px"></div><span>${conf.toFixed(1)}%</span></div></td>
+            <td>${parseFloat(r.inference_ms || 0).toFixed(1)}ms</td>
+            <td>${r.uploader_name || '-'}</td>
+            <td style="font-size:0.78rem;color:#9ca3af;max-width:200px">${r.scene_description || '-'}</td>
+          </tr>`;
+        }).join('');
+        
+        document.getElementById('analytics-status').textContent = '';
+        document.getElementById('analytics-table').style.display = 'table';
+      } catch(err) {
+        document.getElementById('analytics-status').textContent = 'Error loading analytics: ' + err.message;
+      }
     }
   </script>
 </body>
