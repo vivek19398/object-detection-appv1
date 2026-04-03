@@ -3,7 +3,6 @@ from flask_cors import CORS
 import boto3
 import uuid
 import json
-import base64
 from PIL import Image
 import io
 import os
@@ -47,13 +46,19 @@ def upload():
         file = request.files['file']
         image_id = str(uuid.uuid4())
         
-        # Convert image properly
+        # Convert and resize image
         image = Image.open(file.stream).convert("RGB")
+        
+        # Resize to max 800px while maintaining aspect ratio
+        max_size = (800, 800)
+        image.thumbnail(max_size, Image.Resampling.LANCZOS)
+        
+        # Convert to JPEG bytes
         buffer = io.BytesIO()
-        image.save(buffer, format="JPEG")
+        image.save(buffer, format="JPEG", quality=85)
         image_bytes = buffer.getvalue()
         
-        # Upload to S3
+        # Upload original to S3
         s3.put_object(
             Bucket=BUCKET,
             Key=image_id,
@@ -61,19 +66,11 @@ def upload():
             ContentType='image/jpeg'
         )
         
-        # Encode image to base64
-        image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-        
-        # Format payload as JSON
-        payload = json.dumps({
-            "instances": [{"data": image_base64}]
-        })
-        
-        # Call SageMaker endpoint
+        # Call SageMaker endpoint with resized image
         response = runtime.invoke_endpoint(
             EndpointName=ENDPOINT,
-            ContentType='application/json',
-            Body=payload
+            ContentType='application/x-image',
+            Body=image_bytes
         )
         
         result = response['Body'].read().decode()
