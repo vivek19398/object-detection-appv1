@@ -11,14 +11,14 @@ git config pull.rebase false 2>/dev/null || true
 git fetch origin
 git reset --hard origin/main
 git clean -fd
-pip3 install -r requirements.txt --user
+
 echo "Installing dependencies..."
 cd ~/OBJECT-DETECTION-APPV1/backend
 pip3 install -r requirements.txt --user
 
 echo "Starting app..."
 cd ~/OBJECT-DETECTION-APPV1/backend
-nohup gunicorn -w 2 -b 0.0.0.0:8000 -t 300 app:app > app.log 2>&1 &
+nohup ~/.local/bin/gunicorn -w 2 -b 0.0.0.0:8000 -t 300 app:app > app.log 2>&1 &
 
 sleep 3
 
