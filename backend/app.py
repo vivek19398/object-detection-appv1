@@ -14,7 +14,7 @@ CORS(app)
 
 # CONFIG
 BUCKET = "object-detection-uploads-v1"
-ENDPOINT = "jumpstart-dft-mobilenet-v2-fpnlite-20260403-130823"
+ENDPOINT = "tensorflowmodel"
 REGION = "eu-west-1"
 DYNAMODB_TABLE = "detection-results"
 
