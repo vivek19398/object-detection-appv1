@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v1.0.3
@@ -17,8 +17,36 @@ jobs:
         username: ubuntu
         key: ${{ secrets.EC2_KEY }}
         script: |
-          cd OBJECT-DETECTION-APPV1/backend
-          git pull origin main
-          pip3 install -r requirements.txt
-          pkill gunicorn || true
-          nohup python3 -m gunicorn -w 2 -b 0.0.0.0:8000 app:app &
+          # Navigate to project directory (create if doesn't exist)
+          mkdir -p ~/OBJECT-DETECTION-APPV1
+          cd ~/OBJECT-DETECTION-APPV1
+          
+          # Clone or pull latest code
+          if [ -d "backend" ]; then
+            cd backend
+            git pull origin main
+          else
+            git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git backend
+            cd backend
+          fi
+          
+          # Set up virtual environment
+          if [ ! -d "venv" ]; then
+            python3 -m venv venv
+          fi
+          
+          source venv/bin/activate
+          
+          # Install dependencies
+          pip install -r requirements.txt
+          
+          # Stop existing gunicorn process
+          pkill -f "gunicorn.*app:app" || true
+          
+          # Wait a moment for the process to stop
+          sleep 2
+          
+          # Start gunicorn in background
+          nohup venv/bin/gunicorn -w 2 -b 0.0.0.0:8000 app:app > app.log 2>&1 &
+          
+          echo "✅ Deployment complete!"
