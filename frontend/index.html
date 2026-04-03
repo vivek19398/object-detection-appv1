@@ -32,8 +32,8 @@
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
     button { padding: 10px 28px; border-radius: 8px; border: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.15s; }
     #btn-detect { background: #7c3aed; color: #fff; }
-    #btn-detect:hover { background: #6d28d9; }
-    #btn-detect:disabled { background: #2d1b6b; color: #555; cursor: default; }
+    #btn-detect:hover:not(:disabled) { background: #6d28d9; }
+    #btn-detect:disabled { background: #2d1b6b; color: #555; cursor: not-allowed; }
     #btn-clear { background: #374151; color: #ccc; }
     #btn-clear:hover { background: #4b5563; }
     #btn-refresh { background: #065f46; color: #6ee7b7; }
@@ -95,8 +95,9 @@
   <div class="panel active" id="panel-detect">
     <div class="card">
       <div style="display:flex;flex-direction:column;gap:6px">
-        <label style="font-size:0.82rem;color:#9ca3af">Your name (optional)</label>
-        <input type="text" id="uploader-name" placeholder="Enter your name..."
+        <label style="font-size:0.82rem;color:#9ca3af">Your name (required)</label>
+        <input type="text" id="uploader-name" placeholder="Enter your name before uploading..."
+          oninput="checkNameAndFile()"
           style="background:#111;border:1px solid #374151;border-radius:8px;padding:10px 14px;color:#f0f0f0;font-size:0.9rem;outline:none;width:100%">
       </div>
       <div id="drop-zone"
@@ -123,7 +124,7 @@
         <button id="btn-detect" onclick="detectImage()" disabled>Detect objects</button>
         <button id="btn-clear" onclick="clearAll()">Clear</button>
       </div>
-      <div id="upload-status">Choose an image to begin</div>
+      <div id="upload-status">Enter your name and choose an image to begin</div>
     </div>
   </div>
 
@@ -284,13 +285,40 @@
         document.getElementById('drop-zone').style.display = 'none';
       };
       reader.readAsDataURL(file);
-      document.getElementById('btn-detect').disabled = false;
+      
+      // Check if we can enable the button
+      checkNameAndFile();
+      
       document.getElementById('upload-status').textContent = 'Ready to detect';
       document.getElementById('upload-status').className = '';
     }
 
+    function checkNameAndFile() {
+      const nameInput = document.getElementById('uploader-name');
+      const detectBtn = document.getElementById('btn-detect');
+      
+      if (currentFile && nameInput.value.trim().length > 0) {
+        detectBtn.disabled = false;
+        document.getElementById('upload-status').textContent = 'Ready to detect';
+        document.getElementById('upload-status').className = '';
+      } else {
+        detectBtn.disabled = true;
+        if (currentFile && !nameInput.value.trim()) {
+          document.getElementById('upload-status').textContent = 'Please enter your name to continue';
+          document.getElementById('upload-status').className = 'error';
+        }
+      }
+    }
+
     async function detectImage() {
       if (!currentFile) return;
+      
+      const uploaderName = document.getElementById('uploader-name').value.trim();
+      if (!uploaderName) {
+        document.getElementById('upload-status').textContent = 'Please enter your name';
+        document.getElementById('upload-status').className = 'error';
+        return;
+      }
       
       const startTime = Date.now();
       document.getElementById('btn-detect').disabled = true;
@@ -302,7 +330,7 @@
       try {
         const formData = new FormData();
         formData.append('file', currentFile);
-        formData.append('uploader_name', document.getElementById('uploader-name').value || 'Anonymous');
+        formData.append('uploader_name', uploaderName);
 
         const response = await fetch(API_URL + '/upload', {
           method: 'POST',
@@ -343,7 +371,7 @@
         document.getElementById('upload-status').textContent = 'Error: ' + err.message;
         document.getElementById('upload-status').className = 'error';
       } finally {
-        document.getElementById('btn-detect').disabled = false;
+        checkNameAndFile(); // Re-enable if name is still there
       }
     }
 
@@ -357,7 +385,7 @@
       document.getElementById('det-pills').innerHTML = '';
       document.getElementById('inf-time').textContent = '';
       document.getElementById('det-count').textContent = '';
-      document.getElementById('upload-status').textContent = 'Choose an image to begin';
+      document.getElementById('upload-status').textContent = 'Enter your name and choose an image to begin';
       document.getElementById('upload-status').className = '';
       document.getElementById('bedrock-box').style.display = 'none';
     }
@@ -375,7 +403,7 @@
         const records = data.records || [];
         
         if (records.length === 0) {
-          document.getElementById('analytics-status').textContent = 'No detections recorded yet.';
+          document.getElementById('analytics-status').textContent = 'No detections recorded yet. Upload an image to get started!';
           return;
         }
         
