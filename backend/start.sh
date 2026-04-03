@@ -1,31 +1,31 @@
 #!/bin/bash
-set -e
 
-echo "Stopping old app..."
-pkill -f "gunicorn" || true
+# Stop old app
+pkill -f gunicorn || true
 sleep 2
 
-echo "Pulling latest code..."
-cd ~/OBJECT-DETECTION-APPV1
-git config pull.rebase false 2>/dev/null || true
+# Go to repo
+cd ~/OBJECT-DETECTION-APPV1 || exit 1
+
+# Pull latest
 git fetch origin
 git reset --hard origin/main
-git clean -fd
 
-echo "Installing dependencies..."
-cd ~/OBJECT-DETECTION-APPV1/backend
-pip3 install -r requirements.txt --user
+# Go to backend
+cd backend || exit 1
 
-echo "Starting app..."
-cd ~/OBJECT-DETECTION-APPV1/backend
-nohup ~/.local/bin/gunicorn -w 2 -b 0.0.0.0:8000 -t 300 app:app > app.log 2>&1 &
+# Install deps
+~/.local/bin/pip3 install -r requirements.txt --user || pip3 install -r requirements.txt --user
 
+# Start app
+~/.local/bin/gunicorn -w 2 -b 0.0.0.0:8000 -t 300 app:app > app.log 2>&1 &
+
+# Wait and check
 sleep 3
-
-echo "Checking if app started..."
 if curl -f http://localhost:8000/health > /dev/null 2>&1; then
     echo "✅ App started successfully"
 else
-    echo "⚠️ App might not have started properly"
+    echo "❌ Failed - check app.log"
     tail -20 app.log
+    exit 1
 fi
