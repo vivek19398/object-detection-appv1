@@ -62,21 +62,34 @@
     #analytics-status { font-size: 0.82rem; color: #555; text-align: center; padding: 24px; }
     
     /* Architecture styles */
-    .arch-section { display: flex; flex-direction: column; gap: 8px; }
+    .arch-section { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
     .arch-title { font-size: 0.95rem; font-weight: 600; color: #93c5fd; border-bottom: 1px solid #1f2937; padding-bottom: 8px; }
     .arch-text { font-size: 0.85rem; color: #9ca3af; line-height: 1.7; }
+    .code-block { background: #0a0a0a; border: 1px solid #1f2937; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.8rem; color: #d1d5db; overflow-x: auto; line-height: 1.6; }
+    .code-block .key { color: #60a5fa; }
+    .code-block .value { color: #a5b4fc; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+    .info-item { background: #111; border-radius: 8px; padding: 12px; border: 1px solid #1f2937; }
+    .info-label { font-size: 0.75rem; color: #6b7280; margin-bottom: 4px; }
+    .info-value { font-size: 0.85rem; color: #d1d5db; font-family: 'Courier New', monospace; }
     .service-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
     .service-card { background: #111; border-radius: 8px; padding: 14px; border: 1px solid #1f2937; display: flex; flex-direction: column; gap: 4px; }
     .service-name { font-size: 0.85rem; font-weight: 600; color: #a5b4fc; }
     .service-role { font-size: 0.78rem; color: #6b7280; }
+    .service-detail { font-size: 0.75rem; color: #4b5563; margin-top: 4px; font-family: 'Courier New', monospace; }
     .flow-step { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #111; }
     .flow-num { background: #1e3a5f; color: #93c5fd; border-radius: 999px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }
     .flow-text { font-size: 0.83rem; color: #9ca3af; line-height: 1.5; }
     .flow-text strong { color: #d1d5db; }
+    .flow-code { font-family: 'Courier New', monospace; font-size: 0.75rem; color: #60a5fa; }
     .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     .tag { font-size: 0.75rem; padding: 3px 10px; border-radius: 4px; background: #0c1a2e; color: #60a5fa; border: 1px solid #1e3a5f; }
     .tag.green { background: #052e16; color: #4ade80; border-color: #166534; }
     .tag.amber { background: #1c1008; color: #fbbf24; border-color: #854f0b; }
+    .tag.red { background: #1f0a0a; color: #f87171; border-color: #7f1d1d; }
+    .cost-box { background: #1c1008; border: 1px solid #854f0b; border-radius: 8px; padding: 12px; margin: 12px 0; }
+    .cost-title { font-size: 0.8rem; color: #fbbf24; font-weight: 600; margin-bottom: 8px; }
+    .cost-item { font-size: 0.78rem; color: #d1d5db; margin: 4px 0; display: flex; justify-content: space-between; }
     .author-footer { margin-top: 8px; padding-top: 16px; border-top: 1px solid #1f2937; text-align: center; font-size: 0.78rem; color: #4b5563; }
     .author-footer span { color: #6b7280; }
   </style>
@@ -159,92 +172,234 @@
   <div class="panel" id="panel-architecture">
     <div class="card">
       <div class="arch-section">
-        <div class="arch-title">System Architecture</div>
+        <div class="arch-title">System Overview</div>
         <div class="arch-text">
-          This object detection system uses AWS services with automated CI/CD deployment through GitHub Actions.
+          Production-grade object detection system deployed on AWS with real-time ML inference, persistent storage, and generative AI scene understanding. Built for CS5024: Theory and Practice of Advanced AI Ecosystems.
         </div>
       </div>
 
       <div class="arch-section">
-        <div class="arch-title">AWS Services</div>
+        <div class="arch-title">Infrastructure Configuration</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Region</div>
+            <div class="info-value">eu-west-1 (Ireland)</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Compute Instance</div>
+            <div class="info-value">EC2 t2.micro</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">ML Instance</div>
+            <div class="info-value">ml.m5.large</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Public Endpoint</div>
+            <div class="info-value">54.74.221.183:8000</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-section">
+        <div class="arch-title">AWS Services Stack</div>
         <div class="service-grid">
           <div class="service-card">
             <div class="service-name">Amazon EC2</div>
-            <div class="service-role">Flask API hosting</div>
+            <div class="service-role">Flask API + Gunicorn WSGI server</div>
+            <div class="service-detail">Ubuntu 22.04 | t2.micro</div>
           </div>
           <div class="service-card">
             <div class="service-name">Amazon S3</div>
-            <div class="service-role">Image storage</div>
+            <div class="service-role">Image object storage</div>
+            <div class="service-detail">object-detection-uploads-v1</div>
           </div>
           <div class="service-card">
             <div class="service-name">Amazon SageMaker</div>
-            <div class="service-role">MobileNet v2 FPN-Lite inference</div>
+            <div class="service-role">Real-time ML inference endpoint</div>
+            <div class="service-detail">MobileNet v2 FPN-Lite | COCO</div>
           </div>
           <div class="service-card">
             <div class="service-name">Amazon DynamoDB</div>
-            <div class="service-role">Detection results storage</div>
+            <div class="service-role">NoSQL detection results database</div>
+            <div class="service-detail">detection-results table</div>
           </div>
           <div class="service-card">
             <div class="service-name">Amazon Bedrock</div>
-            <div class="service-role">Nova Micro scene descriptions</div>
+            <div class="service-role">Generative AI scene descriptions</div>
+            <div class="service-detail">Nova Micro (us-east-1)</div>
           </div>
           <div class="service-card">
             <div class="service-name">IAM Roles</div>
-            <div class="service-role">Secure service authentication</div>
+            <div class="service-role">Service authentication & authorization</div>
+            <div class="service-detail">EC2 instance role with policies</div>
           </div>
           <div class="service-card">
             <div class="service-name">GitHub Actions</div>
-            <div class="service-role">Automated CI/CD pipeline</div>
+            <div class="service-role">CI/CD automated deployment</div>
+            <div class="service-detail">SSH-based deployment pipeline</div>
           </div>
         </div>
       </div>
 
       <div class="arch-section">
-        <div class="arch-title">Request Flow</div>
+        <div class="arch-title">Request Flow & Data Pipeline</div>
         <div class="flow-step">
           <div class="flow-num">1</div>
-          <div class="flow-text"><strong>User uploads image</strong> through web interface</div>
+          <div class="flow-text">
+            <strong>Frontend Upload:</strong> User selects image + enters name<br>
+            <span class="flow-code">POST /upload multipart/form-data</span>
+          </div>
         </div>
         <div class="flow-step">
           <div class="flow-num">2</div>
-          <div class="flow-text"><strong>Flask API on EC2</strong> receives image, resizes it, and stores in S3</div>
+          <div class="flow-text">
+            <strong>Image Processing:</strong> Flask backend resizes to 800x800, converts to JPEG<br>
+            <span class="flow-code">PIL.Image.thumbnail() → io.BytesIO()</span>
+          </div>
         </div>
         <div class="flow-step">
           <div class="flow-num">3</div>
-          <div class="flow-text"><strong>SageMaker endpoint</strong> processes image using MobileNet v2 FPN-Lite model</div>
+          <div class="flow-text">
+            <strong>S3 Storage:</strong> Image uploaded with UUID as key<br>
+            <span class="flow-code">boto3.s3.put_object(ContentType='image/jpeg')</span>
+          </div>
         </div>
         <div class="flow-step">
           <div class="flow-num">4</div>
-          <div class="flow-text"><strong>Bedrock Nova Micro</strong> generates natural language scene description</div>
+          <div class="flow-text">
+            <strong>SageMaker Inference:</strong> Real-time object detection via HTTP endpoint<br>
+            <span class="flow-code">runtime.invoke_endpoint(ContentType='application/x-image')</span>
+          </div>
         </div>
         <div class="flow-step">
           <div class="flow-num">5</div>
-          <div class="flow-text"><strong>DynamoDB</strong> stores detection results for analytics</div>
+          <div class="flow-text">
+            <strong>Result Parsing:</strong> Extract classes, scores, filter confidence > 30%<br>
+            <span class="flow-code">COCO class mapping, top 10 detections</span>
+          </div>
         </div>
         <div class="flow-step">
           <div class="flow-num">6</div>
-          <div class="flow-text"><strong>Results returned</strong> to frontend with detections and AI description</div>
+          <div class="flow-text">
+            <strong>Bedrock Generation:</strong> LLM creates natural language scene description<br>
+            <span class="flow-code">bedrock.invoke_model('amazon.nova-micro-v1:0')</span>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">7</div>
+          <div class="flow-text">
+            <strong>DynamoDB Logging:</strong> Each detection stored as separate item<br>
+            <span class="flow-code">table.put_item(image_id, timestamp, object, confidence)</span>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">8</div>
+          <div class="flow-text">
+            <strong>Response:</strong> JSON payload with detections + scene description<br>
+            <span class="flow-code">200 OK application/json</span>
+          </div>
         </div>
       </div>
 
       <div class="arch-section">
-        <div class="arch-title">Technical Stack</div>
+        <div class="arch-title">Model Configuration</div>
+        <div class="code-block">
+<span class="key">Model:</span> <span class="value">SSD MobileNet v2 FPN-Lite 320x320</span>
+<span class="key">Framework:</span> <span class="value">TensorFlow 2.8.0</span>
+<span class="key">Dataset:</span> <span class="value">COCO (80 object classes)</span>
+<span class="key">Container:</span> <span class="value">763104351884.dkr.ecr.eu-west-1.amazonaws.com/tensorflow-inference:2.8.0-cpu</span>
+<span class="key">Endpoint:</span> <span class="value">jumpstart-dft-mobilenet-v2-fpnlite-20260403-130823</span>
+<span class="key">Instance Type:</span> <span class="value">ml.m5.large (2 vCPU, 8GB RAM)</span>
+<span class="key">Inference Time:</span> <span class="value">~200-400ms average</span>
+        </div>
+      </div>
+
+      <div class="arch-section">
+        <div class="arch-title">DynamoDB Schema</div>
+        <div class="code-block">
+<span class="key">Table:</span> <span class="value">detection-results</span>
+<span class="key">Partition Key:</span> <span class="value">image_id (String)</span>
+<span class="key">Sort Key:</span> <span class="value">timestamp (String, ISO 8601)</span>
+<span class="key">Attributes:</span>
+  - object_name (String)
+  - confidence (Number, 0-100)
+  - inference_ms (Number)
+  - uploader_name (String)
+  - scene_description (String, from Bedrock)
+  - source (String, default: 'web-upload')
+        </div>
+      </div>
+
+      <div class="arch-section">
+        <div class="arch-title">CI/CD Pipeline (GitHub Actions)</div>
+        <div class="code-block">
+<span class="key">Trigger:</span> <span class="value">Push to main branch</span>
+<span class="key">Runner:</span> <span class="value">ubuntu-latest</span>
+<span class="key">Steps:</span>
+  1. SSH to EC2 via appleboy/ssh-action@v1.0.3
+  2. Git reset --hard origin/main
+  3. pip install -r requirements.txt --break-system-packages
+  4. pkill gunicorn; start.sh
+<span class="key">Secrets:</span>
+  - EC2_KEY (RSA PEM private key)
+  - EC2_HOST (54.74.221.183)
+        </div>
+      </div>
+
+      <div class="arch-section">
+        <div class="arch-title">Cost Analysis</div>
+        <div class="cost-box">
+          <div class="cost-title">Monthly Cost Breakdown (USD)</div>
+          <div class="cost-item"><span>EC2 t2.micro</span><span>$0 (Free Tier)</span></div>
+          <div class="cost-item"><span>SageMaker ml.m5.large 24/7</span><span>$96.00</span></div>
+          <div class="cost-item"><span>S3 Storage (20GB)</span><span>$0.50</span></div>
+          <div class="cost-item"><span>DynamoDB On-Demand</span><span>$0.10</span></div>
+          <div class="cost-item"><span>Bedrock Nova Micro</span><span>$0.50</span></div>
+          <div class="cost-item"><span>Data Transfer</span><span>$1.00</span></div>
+          <div class="cost-item" style="border-top:1px solid #854f0b;margin-top:8px;padding-top:8px;font-weight:600;color:#fbbf24"><span>Total</span><span>~$98/month</span></div>
+        </div>
+        <div class="arch-text" style="font-size:0.78rem;color:#6b7280">
+          Note: SageMaker endpoint is the primary cost driver. Serverless inference would reduce to ~$2/month for typical usage.
+        </div>
+      </div>
+
+      <div class="arch-section">
+        <div class="arch-title">Technology Stack</div>
         <div class="tag-row">
           <span class="tag green">Python 3.10</span>
-          <span class="tag green">Flask + Gunicorn</span>
+          <span class="tag green">Flask 3.0</span>
+          <span class="tag green">Gunicorn WSGI</span>
           <span class="tag green">Boto3 SDK</span>
-          <span class="tag">MobileNet v2 FPN-Lite</span>
+          <span class="tag">TensorFlow 2.8</span>
+          <span class="tag">MobileNet v2</span>
           <span class="tag">PIL/Pillow</span>
           <span class="tag">JavaScript ES6</span>
-          <span class="tag amber">GitHub Actions CI/CD</span>
+          <span class="tag amber">GitHub Actions</span>
           <span class="tag amber">DynamoDB NoSQL</span>
-          <span class="tag amber">Bedrock Nova Micro</span>
+          <span class="tag amber">Bedrock LLM</span>
+          <span class="tag red">CORS Enabled</span>
+        </div>
+      </div>
+
+      <div class="arch-section">
+        <div class="arch-title">Repository Structure</div>
+        <div class="code-block">
+object-detection-appv1/
+├── backend/
+│   ├── app.py              # Flask API + ML logic
+│   ├── requirements.txt    # Python dependencies
+│   └── start.sh            # Gunicorn startup script
+├── frontend/
+│   └── index.html          # SPA (detect, analytics, arch)
+├── .github/workflows/
+│   └── deploy.yml          # CI/CD pipeline
+└── README.md
         </div>
       </div>
 
       <div class="author-footer">
         CS5024: Theory and Practice of Advanced AI Ecosystems<br>
-        <span>University of Limerick • 2026</span>
+        <span>University of Limerick • April 2026 • Vivek Kumar</span>
       </div>
     </div>
   </div>
@@ -259,7 +414,6 @@
       event.target.classList.add('active');
       document.getElementById('panel-' + tab).classList.add('active');
       
-      // Load analytics when switching to analytics tab
       if (tab === 'analytics') {
         loadAnalytics();
       }
@@ -286,7 +440,6 @@
       };
       reader.readAsDataURL(file);
       
-      // Check if we can enable the button
       checkNameAndFile();
       
       document.getElementById('upload-status').textContent = 'Ready to detect';
@@ -356,7 +509,6 @@
 
           document.getElementById('inf-time').textContent = `Inference: ${data.inference_ms}ms`;
           
-          // Show Bedrock description
           if (data.scene_description) {
             document.getElementById('bedrock-text').textContent = data.scene_description;
             document.getElementById('bedrock-box').style.display = 'block';
@@ -371,7 +523,7 @@
         document.getElementById('upload-status').textContent = 'Error: ' + err.message;
         document.getElementById('upload-status').className = 'error';
       } finally {
-        checkNameAndFile(); // Re-enable if name is still there
+        checkNameAndFile();
       }
     }
 
@@ -407,7 +559,6 @@
           return;
         }
         
-        // Calculate stats
         const total = records.length;
         const avgInf = (records.reduce((s, r) => s + parseFloat(r.inference_ms || 0), 0) / total).toFixed(1);
         const avgConf = (records.reduce((s, r) => s + parseFloat(r.confidence || 0), 0) / total).toFixed(1);
@@ -415,7 +566,6 @@
         records.forEach(r => objCounts[r.object_name] = (objCounts[r.object_name] || 0) + 1);
         const topObj = Object.entries(objCounts).sort((a, b) => b[1] - a[1])[0];
         
-        // Display stats
         document.getElementById('stat-cards').innerHTML = [
           { label: 'Total detections', value: total },
           { label: 'Unique objects', value: Object.keys(objCounts).length },
@@ -424,7 +574,6 @@
           { label: 'Most detected', value: topObj ? topObj[0] : '-' }
         ].map(s => `<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
         
-        // Display table
         const tbody = document.getElementById('analytics-body');
         tbody.innerHTML = records.map(r => {
           const ts = r.timestamp ? r.timestamp.replace('T', ' ').substring(0, 19) : '-';
