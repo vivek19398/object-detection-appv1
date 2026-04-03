@@ -16,7 +16,7 @@ CORS(app)
 BUCKET = "object-detection-uploads-v1"
 ENDPOINT = "jumpstart-dft-mobilenet-v2-fpnlite-20260403-130823"
 REGION = "eu-west-1"
-DYNAMODB_TABLE = "detection-result"
+DYNAMODB_TABLE = "detection-results"
 
 # AWS CLIENTS
 s3 = boto3.client('s3', region_name=REGION)
