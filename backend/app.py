@@ -1,12 +1,15 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 import boto3
 import uuid
 import json
 import base64
 from PIL import Image
 import io
+import os
 
 app = Flask(__name__)
+CORS(app)
 
 # CONFIG
 BUCKET = "object-detection-uploads-v1"
@@ -17,10 +20,24 @@ REGION = "eu-west-1"
 s3 = boto3.client('s3', region_name=REGION)
 runtime = boto3.client('sagemaker-runtime', region_name=REGION)
 
-# HEALTH CHECK
+# Serve frontend
 @app.route('/')
-def home():
-    return "App is running 🚀"
+def index():
+    frontend_path = os.path.join(os.path.dirname(__file__), '../frontend')
+    return send_from_directory(frontend_path, 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    frontend_path = os.path.join(os.path.dirname(__file__), '../frontend')
+    try:
+        return send_from_directory(frontend_path, path)
+    except:
+        return send_from_directory(frontend_path, 'index.html')
+
+# Health check
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy"})
 
 # UPLOAD + DETECTION API
 @app.route('/upload', methods=['POST'])
@@ -80,6 +97,5 @@ def upload():
             "message": str(e)
         })
 
-# MAIN
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
