@@ -169,7 +169,7 @@ def upload():
         scene_description = get_scene_description(detections)
         
         # Save to DynamoDB
-        save_detections(detections, uploader_name, inference_ms, scene_description)
+        save_detections(detections, uploader_name, inference_ms, scene_description, image_id)
         
         return jsonify({
             "status": "success",
