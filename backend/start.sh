@@ -7,7 +7,8 @@ sleep 2
 
 echo "Pulling latest code..."
 cd ~/OBJECT-DETECTION-APPV1
-git pull origin main
+git fetch origin
+git reset --hard origin/main
 
 echo "Installing dependencies..."
 cd backend
