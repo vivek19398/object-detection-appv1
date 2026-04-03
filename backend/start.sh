@@ -11,7 +11,7 @@ git config pull.rebase false 2>/dev/null || true
 git fetch origin
 git reset --hard origin/main
 git clean -fd
-
+pip3 install -r requirements.txt --user
 echo "Installing dependencies..."
 cd ~/OBJECT-DETECTION-APPV1/backend
 pip3 install -r requirements.txt --user
