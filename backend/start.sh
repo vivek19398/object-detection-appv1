@@ -7,12 +7,14 @@ sleep 2
 
 echo "Pulling latest code..."
 cd ~/OBJECT-DETECTION-APPV1
+git config pull.rebase false 2>/dev/null || true
 git fetch origin
 git reset --hard origin/main
+git clean -fd
 
 echo "Installing dependencies..."
-cd backend
-pip3 install -r requirements.txt --break-system-packages
+cd ~/OBJECT-DETECTION-APPV1/backend
+pip3 install -r requirements.txt --user
 
 echo "Starting app..."
 cd ~/OBJECT-DETECTION-APPV1/backend
@@ -24,6 +26,6 @@ echo "Checking if app started..."
 if curl -f http://localhost:8000/health > /dev/null 2>&1; then
     echo "✅ App started successfully"
 else
-    echo "⚠️  App might not have started properly"
+    echo "⚠️ App might not have started properly"
     tail -20 app.log
 fi
