@@ -70,12 +70,12 @@ def get_scene_description(detections):
         return None
 
 # Save detections to DynamoDB
-def save_detections(detections, uploader_name, inference_ms, scene_description):
+def save_detections(detections, uploader_name, inference_ms, scene_description, image_id):
     try:
         timestamp = datetime.utcnow().isoformat()
         for det in detections:
             table.put_item(Item={
-                'id': str(uuid.uuid4()),
+                'image_id': image_id,  # Changed from 'id'
                 'timestamp': timestamp,
                 'object_name': det['name'],
                 'confidence': str(round(det['confidence'], 2)),
@@ -86,7 +86,6 @@ def save_detections(detections, uploader_name, inference_ms, scene_description):
             })
     except Exception as e:
         print(f"[DynamoDB] Error: {e}")
-
 # Get analytics from DynamoDB
 @app.route('/analytics', methods=['GET'])
 def get_analytics():
