@@ -38,9 +38,7 @@
     #btn-detect { background: #7c3aed; color: #fff; }
     #btn-detect:hover:not(:disabled) { background: #6d28d9; }
     #btn-detect:disabled { background: #2d1b6b; color: #555; cursor: not-allowed; }
-    #btn-email { background: #065f46; color: #6ee7b7; display: none; }
-    #btn-email:hover:not(:disabled) { background: #047857; }
-    #btn-email:disabled { background: #022c22; color: #555; cursor: not-allowed; }
+    
     #btn-clear { background: #374151; color: #ccc; }
     #btn-clear:hover { background: #4b5563; }
     #btn-refresh { background: #065f46; color: #6ee7b7; }
@@ -51,7 +49,7 @@
     #upload-status.error { color: #f87171; }
     #bedrock-box { display: none; background: #0c1a2e; border: 1px solid #1e3a5f; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #93c5fd; line-height: 1.6; }
     .bedrock-label { font-size: 0.75rem; color: #60a5fa; font-weight: 500; display: block; margin-bottom: 4px; }
-    #email-success { display: none; background: #052e16; border: 1px solid #166534; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #4ade80; }
+    
     
     /* Analytics styles */
     .analytics-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
@@ -125,9 +123,7 @@
         <span id="bedrock-text"></span>
       </div>
 
-      <div id="email-success">
-        <strong>📧 Email sent successfully!</strong> Check your inbox.
-      </div>
+      
 
       <div class="stats-row">
         <span id="inf-time"></span>
@@ -203,10 +199,7 @@
             <div class="service-name">Amazon Bedrock</div>
             <div class="service-role">Nova Micro scene descriptions</div>
           </div>
-          <div class="service-card">
-            <div class="service-name">Amazon SES</div>
-            <div class="service-role">Email notifications</div>
-          </div>
+      
           <div class="service-card">
             <div class="service-name">IAM Roles</div>
             <div class="service-role">Secure service authentication</div>
@@ -312,8 +305,7 @@
       }
       
       document.getElementById('btn-detect').disabled = true;
-      document.getElementById('btn-email').style.display = 'none';
-      document.getElementById('email-success').style.display = 'none';
+    
       document.getElementById('upload-status').textContent = 'Analyzing image...';
       document.getElementById('upload-status').className = 'loading';
       document.getElementById('det-pills').innerHTML = '';
@@ -364,8 +356,6 @@
           document.getElementById('upload-status').textContent = 'Detection complete!';
           document.getElementById('upload-status').className = 'done';
           
-          document.getElementById('btn-email').style.display = 'inline-block';
-          document.getElementById('btn-email').disabled = false;
         } else {
           throw new Error(data.message || 'Detection failed');
         }
@@ -386,14 +376,14 @@
       document.getElementById('preview-wrap').style.display = 'none';
       document.getElementById('drop-zone').style.display = 'block';
       document.getElementById('btn-detect').disabled = true;
-      document.getElementById('btn-email').style.display = 'none';
+      
       document.getElementById('det-pills').innerHTML = '';
       document.getElementById('inf-time').textContent = '';
       document.getElementById('det-count').textContent = '';
       document.getElementById('upload-status').textContent = 'Enter your name and choose an image to begin';
       document.getElementById('upload-status').className = '';
       document.getElementById('bedrock-box').style.display = 'none';
-      document.getElementById('email-success').style.display = 'none';
+      
     }
 
     async function loadAnalytics() {
