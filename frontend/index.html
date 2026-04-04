@@ -15,12 +15,11 @@
     h1 { font-size: 1.2rem; font-weight: 500; color: #ccc; }
     .subtitle { font-size: 0.85rem; color: #555; }
     .badge { font-size: 0.75rem; padding: 2px 10px; border-radius: 4px; background: #1e1b4b; color: #a5b4fc; border: 1px solid #4338ca; }
-    .tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-    .tab { padding: 8px 20px; border-radius: 6px; border: 1px solid #333; background: transparent; color: #888; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; }
-    .tab.active { background: #1e3a5f; border-color: #2563eb; color: #93c5fd; }
-    .panel { display: none; width: 100%; max-width: 780px; flex-direction: column; gap: 16px; }
-    .panel.active { display: flex; }
-    .card { width: 100%; background: #1a1a1a; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .card { width: 100%; max-width: 600px; background: #1a1a1a; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 0.82rem; color: #9ca3af; }
+    input { background: #111; border: 1px solid #374151; border-radius: 8px; padding: 10px 14px; color: #f0f0f0; font-size: 0.9rem; outline: none; width: 100%; }
+    input:focus { border-color: #7c3aed; }
     #drop-zone { width: 100%; padding: 48px 20px; border: 2px dashed #333; border-radius: 10px; text-align: center; cursor: pointer; color: #555; font-size: 0.9rem; transition: border-color 0.2s; }
     #drop-zone:hover { border-color: #555; }
     #drop-zone.dragover { border-color: #7c3aed; color: #a5b4fc; }
@@ -28,146 +27,50 @@
     #upload-preview { width: 100%; border-radius: 8px; max-height: 400px; object-fit: contain; }
     .det-row { display: flex; flex-wrap: wrap; gap: 8px; min-height: 28px; }
     .pill { background: #1e1b4b; border: 1px solid #4338ca; border-radius: 999px; padding: 3px 12px; font-size: 0.82rem; color: #a5b4fc; }
-    .stats-row { display: flex; gap: 16px; font-size: 0.78rem; color: #555; }
+    .stats-row { display: flex; gap: 16px; font-size: 0.78rem; color: #555; flex-wrap: wrap; }
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
     button { padding: 10px 28px; border-radius: 8px; border: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.15s; }
     #btn-detect { background: #7c3aed; color: #fff; }
     #btn-detect:hover:not(:disabled) { background: #6d28d9; }
     #btn-detect:disabled { background: #2d1b6b; color: #555; cursor: not-allowed; }
+    #btn-email { background: #065f46; color: #6ee7b7; display: none; }
+    #btn-email:hover:not(:disabled) { background: #047857; }
+    #btn-email:disabled { background: #022c22; color: #555; cursor: not-allowed; }
     #btn-clear { background: #374151; color: #ccc; }
     #btn-clear:hover { background: #4b5563; }
-    #btn-refresh { background: #065f46; color: #6ee7b7; }
-    #btn-refresh:hover { background: #047857; }
     #upload-status { font-size: 0.85rem; color: #555; }
     #upload-status.loading { color: #facc15; }
     #upload-status.done { color: #4ade80; }
     #upload-status.error { color: #f87171; }
     #bedrock-box { display: none; background: #0c1a2e; border: 1px solid #1e3a5f; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #93c5fd; line-height: 1.6; }
     .bedrock-label { font-size: 0.75rem; color: #60a5fa; font-weight: 500; display: block; margin-bottom: 4px; }
-    
-    /* Analytics styles */
-    .analytics-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .analytics-title { font-size: 1rem; font-weight: 500; color: #ccc; }
-    .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
-    .stat-card { background: #111; border-radius: 8px; padding: 16px; border: 1px solid #1f2937; }
-    .stat-label { font-size: 0.75rem; color: #555; margin-bottom: 4px; }
-    .stat-value { font-size: 1.4rem; font-weight: 600; color: #93c5fd; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-    th { background: #111; color: #6b7280; font-weight: 500; padding: 10px 12px; text-align: left; border-bottom: 1px solid #1f2937; }
-    td { padding: 10px 12px; border-bottom: 1px solid #111; color: #d1d5db; }
-    tr:hover td { background: #1f2937; }
-    .obj-pill { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #1e1b4b; color: #a5b4fc; font-size: 0.78rem; }
-    .conf-bar { display: flex; align-items: center; gap: 8px; }
-    .conf-fill { height: 6px; border-radius: 3px; background: #2563eb; min-width: 4px; }
-    #analytics-status { font-size: 0.82rem; color: #555; text-align: center; padding: 24px; }
-    
-    /* Architecture styles */
-    .arch-section { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-    .arch-title { font-size: 0.95rem; font-weight: 600; color: #93c5fd; border-bottom: 1px solid #1f2937; padding-bottom: 8px; }
-    .arch-text { font-size: 0.85rem; color: #9ca3af; line-height: 1.7; }
-    .code-block { background: #0a0a0a; border: 1px solid #1f2937; border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 0.8rem; color: #d1d5db; overflow-x: auto; line-height: 1.6; }
-    .code-block .key { color: #60a5fa; }
-    .code-block .value { color: #a5b4fc; }
-    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
-    .info-item { background: #111; border-radius: 8px; padding: 12px; border: 1px solid #1f2937; }
-    .info-label { font-size: 0.75rem; color: #6b7280; margin-bottom: 4px; }
-    .info-value { font-size: 0.85rem; color: #d1d5db; font-family: 'Courier New', monospace; }
-    .service-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
-    .service-card { background: #111; border-radius: 8px; padding: 14px; border: 1px solid #1f2937; display: flex; flex-direction: column; gap: 4px; }
-    .service-name { font-size: 0.85rem; font-weight: 600; color: #a5b4fc; }
-    .service-role { font-size: 0.78rem; color: #6b7280; }
-    .service-detail { font-size: 0.75rem; color: #4b5563; margin-top: 4px; font-family: 'Courier New', monospace; }
-    .flow-step { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #111; }
-    .flow-num { background: #1e3a5f; color: #93c5fd; border-radius: 999px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }
-    .flow-text { font-size: 0.83rem; color: #9ca3af; line-height: 1.5; }
-    .flow-text strong { color: #d1d5db; }
-    .flow-code { font-family: 'Courier New', monospace; font-size: 0.75rem; color: #60a5fa; }
-    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .tag { font-size: 0.75rem; padding: 3px 10px; border-radius: 4px; background: #0c1a2e; color: #60a5fa; border: 1px solid #1e3a5f; }
-    .tag.green { background: #052e16; color: #4ade80; border-color: #166534; }
-    .tag.amber { background: #1c1008; color: #fbbf24; border-color: #854f0b; }
-    .tag.red { background: #1f0a0a; color: #f87171; border-color: #7f1d1d; }
-    .cost-box { background: #1c1008; border: 1px solid #854f0b; border-radius: 8px; padding: 12px; margin: 12px 0; }
-    .cost-title { font-size: 0.8rem; color: #fbbf24; font-weight: 600; margin-bottom: 8px; }
-    .cost-item { font-size: 0.78rem; color: #d1d5db; margin: 4px 0; display: flex; justify-content: space-between; }
-    .author-footer { margin-top: 8px; padding-top: 16px; border-top: 1px solid #1f2937; text-align: center; font-size: 0.78rem; color: #4b5563; }
-    .author-footer span { color: #6b7280; }
+    #email-success { display: none; background: #052e16; border: 1px solid #166534; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #4ade80; }
   </style>
 </head>
 <body>
   <h1>CS5024: Object Detection <span class="badge">GenAI + AWS</span></h1>
-  <p class="subtitle">Powered by EC2, S3, SageMaker, DynamoDB & Bedrock</p>
+  <p class="subtitle">Powered by EC2, S3, SageMaker, DynamoDB, Bedrock & SES</p>
 
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('detect')">Detect objects</button>
-    <button class="tab" onclick="switchTab('analytics')">Analytics</button>
-    <button class="tab" onclick="switchTab('architecture')">Architecture</button>
-  </div>
-
-  <!-- Detection panel -->
-  <div class="panel active" id="panel-detect">
-    <div class="card">
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <label style="font-size:0.82rem;color:#9ca3af">Your name (required)</label>
-        <input type="text" id="uploader-name" placeholder="Enter your name before uploading..."
-          oninput="checkNameAndFile()"
-          style="background:#111;border:1px solid #374151;border-radius:8px;padding:10px 14px;color:#f0f0f0;font-size:0.9rem;outline:none;width:100%">
-      </div>
-      <div id="drop-zone"
-           onclick="document.getElementById('file-input').click()"
-           ondragover="event.preventDefault();this.classList.add('dragover')"
-           ondragleave="this.classList.remove('dragover')"
-           ondrop="handleDrop(event)">
-        <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])" style="display:none">
-        📁 Drag and drop an image here, or click to browse
-      </div>
-      <div id="preview-wrap">
-        <img id="upload-preview" alt="preview">
-      </div>
-      <div class="det-row" id="det-pills"></div>
-      <div id="bedrock-box">
-        <span class="bedrock-label">Amazon Bedrock — Nova Micro</span>
-        <span id="bedrock-text"></span>
-      </div>
-      <div class="stats-row">
-        <span id="inf-time"></span>
-        <span id="det-count"></span>
-      </div>
-      <div class="btn-row">
-        <button id="btn-detect" onclick="detectImage()" disabled>Detect objects</button>
-        <button id="btn-clear" onclick="clearAll()">Clear</button>
-      </div>
-      <div id="upload-status">Enter your name and choose an image to begin</div>
+  <div class="card">
+    <div class="form-group">
+      <label>Your name (required)</label>
+      <input type="text" id="uploader-name" placeholder="Enter your name..." oninput="checkNameAndFile()">
     </div>
-  </div>
 
-  <!-- Analytics panel -->
-  <div class="panel" id="panel-analytics">
-    <div class="card">
-      <div class="analytics-header">
-        <span class="analytics-title">Detection History — DynamoDB</span>
-        <button id="btn-refresh" onclick="loadAnalytics()">Refresh</button>
-      </div>
-      <div class="stat-cards" id="stat-cards"></div>
-      <div style="overflow-x:auto">
-        <table id="analytics-table" style="display:none">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Object</th>
-              <th>Confidence</th>
-              <th>Inference</th>
-              <th>Uploader</th>
-              <th>Scene Description</th>
-            </tr>
-          </thead>
-          <tbody id="analytics-body"></tbody>
-        </table>
-      </div>
-      <div id="analytics-status">Click Refresh to load detection history</div>
+    <div class="form-group">
+      <label>Your email (for results notification)</label>
+      <input type="email" id="uploader-email" placeholder="Enter your email...">
     </div>
-  </div>
 
+<<<<<<< HEAD
+    <div id="drop-zone"
+         onclick="document.getElementById('file-input').click()"
+         ondragover="event.preventDefault();this.classList.add('dragover')"
+         ondragleave="this.classList.remove('dragover')"
+         ondrop="handleDrop(event)">
+      <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])" style="display:none">
+      📁 Drag and drop an image here, or click to browse
+=======
   <!-- Architecture panel -->
   <div class="panel" id="panel-architecture">
     <div class="card">
@@ -401,23 +304,43 @@ object-detection-appv1/
         CS5024: Theory and Practice of Advanced AI Ecosystems<br>
         <span>University of Limerick • April 2026 • Vivek Ranjan</span>
       </div>
+>>>>>>> 50738253caf4457184fb2fc80edf4325f2b1f405
     </div>
+
+    <div id="preview-wrap">
+      <img id="upload-preview" alt="preview">
+    </div>
+
+    <div class="det-row" id="det-pills"></div>
+
+    <div id="bedrock-box">
+      <span class="bedrock-label">Amazon Bedrock — Nova Micro</span>
+      <span id="bedrock-text"></span>
+    </div>
+
+    <div id="email-success">
+      <strong>📧 Email sent successfully!</strong> Check your inbox.
+    </div>
+
+    <div class="stats-row">
+      <span id="inf-time"></span>
+      <span id="det-count"></span>
+    </div>
+
+    <div class="btn-row">
+      <button id="btn-detect" onclick="detectImage()" disabled>Detect objects</button>
+      <button id="btn-email" onclick="emailResults()" disabled>📧 Email Results</button>
+      <button id="btn-clear" onclick="clearAll()">Clear</button>
+    </div>
+
+    <div id="upload-status">Enter your name and choose an image to begin</div>
   </div>
 
   <script>
-    const API_URL = 'http://54.74.221.183:8000';
+    const API_URL = 'http://52.215.158.148:8000';
+    
     let currentFile = null;
-
-    function switchTab(tab) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      event.target.classList.add('active');
-      document.getElementById('panel-' + tab).classList.add('active');
-      
-      if (tab === 'analytics') {
-        loadAnalytics();
-      }
-    }
+    let detectionResults = null; // Store results for emailing
 
     function handleDrop(e) {
       e.preventDefault();
@@ -473,8 +396,9 @@ object-detection-appv1/
         return;
       }
       
-      const startTime = Date.now();
       document.getElementById('btn-detect').disabled = true;
+      document.getElementById('btn-email').style.display = 'none';
+      document.getElementById('email-success').style.display = 'none';
       document.getElementById('upload-status').textContent = 'Analyzing image...';
       document.getElementById('upload-status').className = 'loading';
       document.getElementById('det-pills').innerHTML = '';
@@ -495,6 +419,15 @@ object-detection-appv1/
         const data = await response.json();
 
         if (data.status === 'success') {
+          // Store results for emailing
+          detectionResults = {
+            detections: data.detections || [],
+            scene_description: data.scene_description,
+            inference_ms: data.inference_ms,
+            image_url: data.s3_url,
+            uploader_name: uploaderName
+          };
+          
           const detections = data.detections || [];
           
           if (detections.length > 0) {
@@ -516,6 +449,10 @@ object-detection-appv1/
           
           document.getElementById('upload-status').textContent = 'Detection complete!';
           document.getElementById('upload-status').className = 'done';
+          
+          // Show email button
+          document.getElementById('btn-email').style.display = 'inline-block';
+          document.getElementById('btn-email').disabled = false;
         } else {
           throw new Error(data.message || 'Detection failed');
         }
@@ -527,72 +464,81 @@ object-detection-appv1/
       }
     }
 
+    async function emailResults() {
+      const emailInput = document.getElementById('uploader-email');
+      const email = emailInput.value.trim();
+      
+      if (!email) {
+        alert('Please enter your email address');
+        emailInput.focus();
+        return;
+      }
+      
+      // Simple email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        alert('Please enter a valid email address');
+        emailInput.focus();
+        return;
+      }
+      
+      if (!detectionResults) {
+        alert('No detection results to email. Please run detection first.');
+        return;
+      }
+      
+      document.getElementById('btn-email').disabled = true;
+      document.getElementById('upload-status').textContent = 'Sending email...';
+      document.getElementById('upload-status').className = 'loading';
+      
+      try {
+        const response = await fetch(API_URL + '/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to_email: email,
+            uploader_name: detectionResults.uploader_name,
+            detections: detectionResults.detections,
+            scene_description: detectionResults.scene_description,
+            inference_ms: detectionResults.inference_ms,
+            image_url: detectionResults.image_url
+          })
+        });
+        
+        if (!response.ok) throw new Error('Failed to send email');
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          document.getElementById('email-success').style.display = 'block';
+          document.getElementById('upload-status').textContent = `Email sent to ${email}`;
+          document.getElementById('upload-status').className = 'done';
+        } else {
+          throw new Error(data.message || 'Email sending failed');
+        }
+      } catch(err) {
+        document.getElementById('upload-status').textContent = 'Email failed: ' + err.message;
+        document.getElementById('upload-status').className = 'error';
+        document.getElementById('btn-email').disabled = false;
+      }
+    }
+
     function clearAll() {
       currentFile = null;
+      detectionResults = null;
       document.getElementById('file-input').value = '';
       document.getElementById('upload-preview').style.display = 'none';
       document.getElementById('preview-wrap').style.display = 'none';
       document.getElementById('drop-zone').style.display = 'block';
       document.getElementById('btn-detect').disabled = true;
+      document.getElementById('btn-email').style.display = 'none';
       document.getElementById('det-pills').innerHTML = '';
       document.getElementById('inf-time').textContent = '';
       document.getElementById('det-count').textContent = '';
       document.getElementById('upload-status').textContent = 'Enter your name and choose an image to begin';
       document.getElementById('upload-status').className = '';
       document.getElementById('bedrock-box').style.display = 'none';
-    }
-
-    async function loadAnalytics() {
-      document.getElementById('analytics-status').textContent = 'Loading from DynamoDB...';
-      document.getElementById('analytics-table').style.display = 'none';
-      document.getElementById('stat-cards').innerHTML = '';
-      
-      try {
-        const response = await fetch(API_URL + '/analytics');
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        
-        const data = await response.json();
-        const records = data.records || [];
-        
-        if (records.length === 0) {
-          document.getElementById('analytics-status').textContent = 'No detections recorded yet. Upload an image to get started!';
-          return;
-        }
-        
-        const total = records.length;
-        const avgInf = (records.reduce((s, r) => s + parseFloat(r.inference_ms || 0), 0) / total).toFixed(1);
-        const avgConf = (records.reduce((s, r) => s + parseFloat(r.confidence || 0), 0) / total).toFixed(1);
-        const objCounts = {};
-        records.forEach(r => objCounts[r.object_name] = (objCounts[r.object_name] || 0) + 1);
-        const topObj = Object.entries(objCounts).sort((a, b) => b[1] - a[1])[0];
-        
-        document.getElementById('stat-cards').innerHTML = [
-          { label: 'Total detections', value: total },
-          { label: 'Unique objects', value: Object.keys(objCounts).length },
-          { label: 'Avg confidence', value: avgConf + '%' },
-          { label: 'Avg inference', value: avgInf + 'ms' },
-          { label: 'Most detected', value: topObj ? topObj[0] : '-' }
-        ].map(s => `<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
-        
-        const tbody = document.getElementById('analytics-body');
-        tbody.innerHTML = records.map(r => {
-          const ts = r.timestamp ? r.timestamp.replace('T', ' ').substring(0, 19) : '-';
-          const conf = parseFloat(r.confidence || 0);
-          return `<tr>
-            <td>${ts}</td>
-            <td><span class="obj-pill">${r.object_name || '-'}</span></td>
-            <td><div class="conf-bar"><div class="conf-fill" style="width:${Math.round(conf)}px"></div><span>${conf.toFixed(1)}%</span></div></td>
-            <td>${parseFloat(r.inference_ms || 0).toFixed(1)}ms</td>
-            <td>${r.uploader_name || '-'}</td>
-            <td style="font-size:0.78rem;color:#9ca3af;max-width:200px">${r.scene_description || '-'}</td>
-          </tr>`;
-        }).join('');
-        
-        document.getElementById('analytics-status').textContent = '';
-        document.getElementById('analytics-table').style.display = 'table';
-      } catch(err) {
-        document.getElementById('analytics-status').textContent = 'Error loading analytics: ' + err.message;
-      }
+      document.getElementById('email-success').style.display = 'none';
     }
   </script>
 </body>
