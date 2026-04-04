@@ -18,7 +18,7 @@ BUCKET = "object-detection-uploads-v1"
 ENDPOINT = "tensorflowmodel"
 REGION = "eu-west-1"
 DYNAMODB_TABLE = "detection-results"
-EMAIL_API_ENDPOINT = "https://utff4m7sn5.execute-api.eu-west-1.amazonaws.com/send-mail"
+EMAIL_API_ENDPOINT = "https://utff4m7sn5.execute-api.eu-west-1.amazonaws.com/send-email"
 
 # AWS CLIENTS
 s3 = boto3.client('s3', region_name=REGION)
