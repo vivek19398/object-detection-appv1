@@ -8,6 +8,7 @@ import io
 import os
 import time
 from datetime import datetime
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +18,7 @@ BUCKET = "object-detection-uploads-v1"
 ENDPOINT = "tensorflowmodel"
 REGION = "eu-west-1"
 DYNAMODB_TABLE = "detection-results"
+EMAIL_API_ENDPOINT = "https://l9hpmpujie.execute-api.eu-west-1.amazonaws.com/send-mail"
 
 # AWS CLIENTS
 s3 = boto3.client('s3', region_name=REGION)
@@ -185,6 +187,59 @@ def upload():
             "status": "error",
             "message": str(e)
         })
+
+@app.route('/send-email', methods=['POST'])
+def send_email():
+    """
+    Endpoint to trigger Lambda function for sending email
+    """
+    try:
+        data = request.get_json()
+        
+        to_email = data.get('to_email')
+        uploader_name = data.get('uploader_name')
+        detections = data.get('detections', [])
+        scene_description = data.get('scene_description', '')
+        inference_ms = data.get('inference_ms', 0)
+        image_url = data.get('image_url', '')
+        
+        if not to_email:
+            return jsonify({
+                "status": "error",
+                "message": "Email address is required"
+            }), 400
+        
+        # Call Lambda via API Gateway
+        response = requests.post(
+            EMAIL_API_ENDPOINT,
+            json={
+                'to_email': to_email,
+                'uploader_name': uploader_name,
+                'detections': detections,
+                'scene_description': scene_description,
+                'inference_ms': inference_ms,
+                'image_url': image_url
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return jsonify({
+                "status": "success",
+                "message": f"Email sent to {to_email}"
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "Failed to send email"
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 # COCO class names
 COCO_CLASSES = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
