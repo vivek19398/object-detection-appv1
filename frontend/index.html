@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CS5024: aAI based Object Detection</title>
+  <title>CS5024: AI based Object Detection</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -15,7 +15,12 @@
     h1 { font-size: 1.2rem; font-weight: 500; color: #ccc; }
     .subtitle { font-size: 0.85rem; color: #555; }
     .badge { font-size: 0.75rem; padding: 2px 10px; border-radius: 4px; background: #1e1b4b; color: #a5b4fc; border: 1px solid #4338ca; }
-    .card { width: 100%; max-width: 600px; background: #1a1a1a; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .tab { padding: 8px 20px; border-radius: 6px; border: 1px solid #333; background: transparent; color: #888; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; }
+    .tab.active { background: #1e3a5f; border-color: #2563eb; color: #93c5fd; }
+    .panel { display: none; width: 100%; max-width: 780px; flex-direction: column; gap: 16px; }
+    .panel.active { display: flex; }
+    .card { width: 100%; background: #1a1a1a; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     label { font-size: 0.82rem; color: #9ca3af; }
     input { background: #111; border: 1px solid #374151; border-radius: 8px; padding: 10px 14px; color: #f0f0f0; font-size: 0.9rem; outline: none; width: 100%; }
@@ -38,6 +43,8 @@
     #btn-email:disabled { background: #022c22; color: #555; cursor: not-allowed; }
     #btn-clear { background: #374151; color: #ccc; }
     #btn-clear:hover { background: #4b5563; }
+    #btn-refresh { background: #065f46; color: #6ee7b7; }
+    #btn-refresh:hover { background: #047857; }
     #upload-status { font-size: 0.85rem; color: #555; }
     #upload-status.loading { color: #facc15; }
     #upload-status.done { color: #4ade80; }
@@ -45,224 +52,173 @@
     #bedrock-box { display: none; background: #0c1a2e; border: 1px solid #1e3a5f; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #93c5fd; line-height: 1.6; }
     .bedrock-label { font-size: 0.75rem; color: #60a5fa; font-weight: 500; display: block; margin-bottom: 4px; }
     #email-success { display: none; background: #052e16; border: 1px solid #166534; border-radius: 8px; padding: 12px 16px; font-size: 0.85rem; color: #4ade80; }
+    
+    /* Analytics styles */
+    .analytics-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .analytics-title { font-size: 1rem; font-weight: 500; color: #ccc; }
+    .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
+    .stat-card { background: #111; border-radius: 8px; padding: 16px; border: 1px solid #1f2937; }
+    .stat-label { font-size: 0.75rem; color: #555; margin-bottom: 4px; }
+    .stat-value { font-size: 1.4rem; font-weight: 600; color: #93c5fd; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th { background: #111; color: #6b7280; font-weight: 500; padding: 10px 12px; text-align: left; border-bottom: 1px solid #1f2937; }
+    td { padding: 10px 12px; border-bottom: 1px solid #111; color: #d1d5db; }
+    tr:hover td { background: #1f2937; }
+    .obj-pill { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #1e1b4b; color: #a5b4fc; font-size: 0.78rem; }
+    .conf-bar { display: flex; align-items: center; gap: 8px; }
+    .conf-fill { height: 6px; border-radius: 3px; background: #2563eb; min-width: 4px; }
+    #analytics-status { font-size: 0.82rem; color: #555; text-align: center; padding: 24px; }
+    
+    /* Architecture styles */
+    .arch-section { display: flex; flex-direction: column; gap: 8px; }
+    .arch-title { font-size: 0.95rem; font-weight: 600; color: #93c5fd; border-bottom: 1px solid #1f2937; padding-bottom: 8px; }
+    .arch-text { font-size: 0.85rem; color: #9ca3af; line-height: 1.7; }
+    .service-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .service-card { background: #111; border-radius: 8px; padding: 14px; border: 1px solid #1f2937; display: flex; flex-direction: column; gap: 4px; }
+    .service-name { font-size: 0.85rem; font-weight: 600; color: #a5b4fc; }
+    .service-role { font-size: 0.78rem; color: #6b7280; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .tag { font-size: 0.75rem; padding: 3px 10px; border-radius: 4px; background: #0c1a2e; color: #60a5fa; border: 1px solid #1e3a5f; }
+    .tag.green { background: #052e16; color: #4ade80; border-color: #166534; }
+    .tag.amber { background: #1c1008; color: #fbbf24; border-color: #854f0b; }
+    .author-footer { margin-top: 8px; padding-top: 16px; border-top: 1px solid #1f2937; text-align: center; font-size: 0.78rem; color: #4b5563; }
+    .author-footer span { color: #6b7280; }
   </style>
 </head>
 <body>
   <h1>CS5024: Object Detection <span class="badge">GenAI + AWS</span></h1>
   <p class="subtitle">Powered by EC2, S3, SageMaker, DynamoDB, Bedrock & SES</p>
 
-  <div class="card">
-    <div class="form-group">
-      <label>Your name (required)</label>
-      <input type="text" id="uploader-name" placeholder="Enter your name..." oninput="checkNameAndFile()">
-    </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('detect')">Detect objects</button>
+    <button class="tab" onclick="switchTab('analytics')">Analytics</button>
+    <button class="tab" onclick="switchTab('architecture')">Architecture</button>
+  </div>
 
-    <div class="form-group">
-      <label>Your email (for results notification)</label>
-      <input type="email" id="uploader-email" placeholder="Enter your email...">
-    </div>
+  <!-- Detection panel -->
+  <div class="panel active" id="panel-detect">
+    <div class="card">
+      <div class="form-group">
+        <label>Your name (required)</label>
+        <input type="text" id="uploader-name" placeholder="Enter your name..." oninput="checkNameAndFile()">
+      </div>
 
-<<<<<<< HEAD
-    <div id="drop-zone"
-         onclick="document.getElementById('file-input').click()"
-         ondragover="event.preventDefault();this.classList.add('dragover')"
-         ondragleave="this.classList.remove('dragover')"
-         ondrop="handleDrop(event)">
-      <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])" style="display:none">
-      📁 Drag and drop an image here, or click to browse
-=======
+      <div class="form-group">
+        <label>Your email (for results notification)</label>
+        <input type="email" id="uploader-email" placeholder="Enter your email...">
+      </div>
+
+      <div id="drop-zone"
+           onclick="document.getElementById('file-input').click()"
+           ondragover="event.preventDefault();this.classList.add('dragover')"
+           ondragleave="this.classList.remove('dragover')"
+           ondrop="handleDrop(event)">
+        <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])" style="display:none">
+        📁 Drag and drop an image here, or click to browse
+      </div>
+
+      <div id="preview-wrap">
+        <img id="upload-preview" alt="preview">
+      </div>
+
+      <div class="det-row" id="det-pills"></div>
+
+      <div id="bedrock-box">
+        <span class="bedrock-label">Amazon Bedrock — Nova Micro</span>
+        <span id="bedrock-text"></span>
+      </div>
+
+      <div id="email-success">
+        <strong>📧 Email sent successfully!</strong> Check your inbox.
+      </div>
+
+      <div class="stats-row">
+        <span id="inf-time"></span>
+        <span id="det-count"></span>
+      </div>
+
+      <div class="btn-row">
+        <button id="btn-detect" onclick="detectImage()" disabled>Detect objects</button>
+        <button id="btn-email" onclick="emailResults()" disabled>📧 Email Results</button>
+        <button id="btn-clear" onclick="clearAll()">Clear</button>
+      </div>
+
+      <div id="upload-status">Enter your name and choose an image to begin</div>
+    </div>
+  </div>
+
+  <!-- Analytics panel -->
+  <div class="panel" id="panel-analytics">
+    <div class="card">
+      <div class="analytics-header">
+        <span class="analytics-title">Detection History — DynamoDB</span>
+        <button id="btn-refresh" onclick="loadAnalytics()">Refresh</button>
+      </div>
+      <div class="stat-cards" id="stat-cards"></div>
+      <div style="overflow-x:auto">
+        <table id="analytics-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Object</th>
+              <th>Confidence</th>
+              <th>Inference</th>
+              <th>Uploader</th>
+              <th>Scene Description</th>
+            </tr>
+          </thead>
+          <tbody id="analytics-body"></tbody>
+        </table>
+      </div>
+      <div id="analytics-status">Click Refresh to load detection history</div>
+    </div>
+  </div>
+
   <!-- Architecture panel -->
   <div class="panel" id="panel-architecture">
     <div class="card">
       <div class="arch-section">
-        <div class="arch-title">System Overview</div>
+        <div class="arch-title">System Architecture</div>
         <div class="arch-text">
-          Production-grade object detection system deployed on AWS with real-time ML inference, persistent storage, and generative AI scene understanding. Built for CS5024: Theory and Practice of Advanced AI Ecosystems.
+          This object detection system uses AWS services with automated CI/CD deployment through GitHub Actions.
         </div>
       </div>
 
       <div class="arch-section">
-        <div class="arch-title">Infrastructure Configuration</div>
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="info-label">Region</div>
-            <div class="info-value">eu-west-1 (Ireland)</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Compute Instance</div>
-            <div class="info-value">EC2 t2.micro</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">ML Instance</div>
-            <div class="info-value">ml.m5.large</div>
-          </div>
-          <div class="info-item">
-            <div class="info-label">Public Endpoint</div>
-            <div class="info-value">54.74.221.183:8000</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="arch-section">
-        <div class="arch-title">AWS Services Stack</div>
+        <div class="arch-title">AWS Services</div>
         <div class="service-grid">
           <div class="service-card">
             <div class="service-name">Amazon EC2</div>
-            <div class="service-role">Flask API + Gunicorn WSGI server</div>
-            <div class="service-detail">Ubuntu 22.04 | t2.micro</div>
+            <div class="service-role">Flask API hosting</div>
           </div>
           <div class="service-card">
             <div class="service-name">Amazon S3</div>
-            <div class="service-role">Image object storage</div>
-            <div class="service-detail">object-detection-uploads-v1</div>
+            <div class="service-role">Image storage</div>
           </div>
           <div class="service-card">
             <div class="service-name">Amazon SageMaker</div>
-            <div class="service-role">Real-time ML inference endpoint</div>
-            <div class="service-detail">MobileNet v2 FPN-Lite | COCO</div>
+            <div class="service-role">MobileNet v2 FPN-Lite inference</div>
           </div>
           <div class="service-card">
             <div class="service-name">Amazon DynamoDB</div>
-            <div class="service-role">NoSQL detection results database</div>
-            <div class="service-detail">detection-results table</div>
+            <div class="service-role">Detection results storage</div>
           </div>
           <div class="service-card">
             <div class="service-name">Amazon Bedrock</div>
-            <div class="service-role">Generative AI scene descriptions</div>
-            <div class="service-detail">Nova Micro (us-east-1)</div>
+            <div class="service-role">Nova Micro scene descriptions</div>
+          </div>
+          <div class="service-card">
+            <div class="service-name">Amazon SES</div>
+            <div class="service-role">Email notifications</div>
           </div>
           <div class="service-card">
             <div class="service-name">IAM Roles</div>
-            <div class="service-role">Service authentication & authorization</div>
-            <div class="service-detail">EC2 instance role with policies</div>
+            <div class="service-role">Secure service authentication</div>
           </div>
           <div class="service-card">
             <div class="service-name">GitHub Actions</div>
-            <div class="service-role">CI/CD automated deployment</div>
-            <div class="service-detail">SSH-based deployment pipeline</div>
+            <div class="service-role">Automated CI/CD pipeline</div>
           </div>
-        </div>
-      </div>
-
-      <div class="arch-section">
-        <div class="arch-title">Request Flow & Data Pipeline</div>
-        <div class="flow-step">
-          <div class="flow-num">1</div>
-          <div class="flow-text">
-            <strong>Frontend Upload:</strong> User selects image + enters name<br>
-            <span class="flow-code">POST /upload multipart/form-data</span>
-          </div>
-        </div>
-        <div class="flow-step">
-          <div class="flow-num">2</div>
-          <div class="flow-text">
-            <strong>Image Processing:</strong> Flask backend resizes to 800x800, converts to JPEG<br>
-            <span class="flow-code">PIL.Image.thumbnail() → io.BytesIO()</span>
-          </div>
-        </div>
-        <div class="flow-step">
-          <div class="flow-num">3</div>
-          <div class="flow-text">
-            <strong>S3 Storage:</strong> Image uploaded with UUID as key<br>
-            <span class="flow-code">boto3.s3.put_object(ContentType='image/jpeg')</span>
-          </div>
-        </div>
-        <div class="flow-step">
-          <div class="flow-num">4</div>
-          <div class="flow-text">
-            <strong>SageMaker Inference:</strong> Real-time object detection via HTTP endpoint<br>
-            <span class="flow-code">runtime.invoke_endpoint(ContentType='application/x-image')</span>
-          </div>
-        </div>
-        <div class="flow-step">
-          <div class="flow-num">5</div>
-          <div class="flow-text">
-            <strong>Result Parsing:</strong> Extract classes, scores, filter confidence > 30%<br>
-            <span class="flow-code">COCO class mapping, top 10 detections</span>
-          </div>
-        </div>
-        <div class="flow-step">
-          <div class="flow-num">6</div>
-          <div class="flow-text">
-            <strong>Bedrock Generation:</strong> LLM creates natural language scene description<br>
-            <span class="flow-code">bedrock.invoke_model('amazon.nova-micro-v1:0')</span>
-          </div>
-        </div>
-        <div class="flow-step">
-          <div class="flow-num">7</div>
-          <div class="flow-text">
-            <strong>DynamoDB Logging:</strong> Each detection stored as separate item<br>
-            <span class="flow-code">table.put_item(image_id, timestamp, object, confidence)</span>
-          </div>
-        </div>
-        <div class="flow-step">
-          <div class="flow-num">8</div>
-          <div class="flow-text">
-            <strong>Response:</strong> JSON payload with detections + scene description<br>
-            <span class="flow-code">200 OK application/json</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="arch-section">
-        <div class="arch-title">Model Configuration</div>
-        <div class="code-block">
-<span class="key">Model:</span> <span class="value">SSD MobileNet v2 FPN-Lite 320x320</span>
-<span class="key">Framework:</span> <span class="value">TensorFlow 2.8.0</span>
-<span class="key">Dataset:</span> <span class="value">COCO (80 object classes)</span>
-<span class="key">Container:</span> <span class="value">763104351884.dkr.ecr.eu-west-1.amazonaws.com/tensorflow-inference:2.8.0-cpu</span>
-<span class="key">Endpoint:</span> <span class="value">jumpstart-dft-mobilenet-v2-fpnlite-20260403-130823</span>
-<span class="key">Instance Type:</span> <span class="value">ml.m5.large (2 vCPU, 8GB RAM)</span>
-<span class="key">Inference Time:</span> <span class="value">~200-400ms average</span>
-        </div>
-      </div>
-
-      <div class="arch-section">
-        <div class="arch-title">DynamoDB Schema</div>
-        <div class="code-block">
-<span class="key">Table:</span> <span class="value">detection-results</span>
-<span class="key">Partition Key:</span> <span class="value">image_id (String)</span>
-<span class="key">Sort Key:</span> <span class="value">timestamp (String, ISO 8601)</span>
-<span class="key">Attributes:</span>
-  - object_name (String)
-  - confidence (Number, 0-100)
-  - inference_ms (Number)
-  - uploader_name (String)
-  - scene_description (String, from Bedrock)
-  - source (String, default: 'web-upload')
-        </div>
-      </div>
-
-      <div class="arch-section">
-        <div class="arch-title">CI/CD Pipeline (GitHub Actions)</div>
-        <div class="code-block">
-<span class="key">Trigger:</span> <span class="value">Push to main branch</span>
-<span class="key">Runner:</span> <span class="value">ubuntu-latest</span>
-<span class="key">Steps:</span>
-  1. SSH to EC2 via appleboy/ssh-action@v1.0.3
-  2. Git reset --hard origin/main
-  3. pip install -r requirements.txt --break-system-packages
-  4. pkill gunicorn; start.sh
-<span class="key">Secrets:</span>
-  - EC2_KEY (RSA PEM private key)
-  - EC2_HOST (54.74.221.183)
-        </div>
-      </div>
-
-      <div class="arch-section">
-        <div class="arch-title">Cost Analysis</div>
-        <div class="cost-box">
-          <div class="cost-title">Monthly Cost Breakdown (USD)</div>
-          <div class="cost-item"><span>EC2 t2.micro</span><span>$0 (Free Tier)</span></div>
-          <div class="cost-item"><span>SageMaker ml.m5.large 24/7</span><span>$96.00</span></div>
-          <div class="cost-item"><span>S3 Storage (20GB)</span><span>$0.50</span></div>
-          <div class="cost-item"><span>DynamoDB On-Demand</span><span>$0.10</span></div>
-          <div class="cost-item"><span>Bedrock Nova Micro</span><span>$0.50</span></div>
-          <div class="cost-item"><span>Data Transfer</span><span>$1.00</span></div>
-          <div class="cost-item" style="border-top:1px solid #854f0b;margin-top:8px;padding-top:8px;font-weight:600;color:#fbbf24"><span>Total</span><span>~$98/month</span></div>
-        </div>
-        <div class="arch-text" style="font-size:0.78rem;color:#6b7280">
-          Note: SageMaker endpoint is the primary cost driver. Serverless inference would reduce to ~$2/month for typical usage.
         </div>
       </div>
 
@@ -270,77 +226,40 @@
         <div class="arch-title">Technology Stack</div>
         <div class="tag-row">
           <span class="tag green">Python 3.10</span>
-          <span class="tag green">Flask 3.0</span>
-          <span class="tag green">Gunicorn WSGI</span>
+          <span class="tag green">Flask + Gunicorn</span>
           <span class="tag green">Boto3 SDK</span>
-          <span class="tag">TensorFlow 2.8</span>
-          <span class="tag">MobileNet v2</span>
+          <span class="tag">MobileNet v2 FPN-Lite</span>
           <span class="tag">PIL/Pillow</span>
           <span class="tag">JavaScript ES6</span>
-          <span class="tag amber">GitHub Actions</span>
+          <span class="tag amber">GitHub Actions CI/CD</span>
           <span class="tag amber">DynamoDB NoSQL</span>
-          <span class="tag amber">Bedrock LLM</span>
-          <span class="tag red">CORS Enabled</span>
-        </div>
-      </div>
-
-      <div class="arch-section">
-        <div class="arch-title">Repository Structure</div>
-        <div class="code-block">
-object-detection-appv1/
-├── backend/
-│   ├── app.py              # Flask API + ML logic
-│   ├── requirements.txt    # Python dependencies
-│   └── start.sh            # Gunicorn startup script
-├── frontend/
-│   └── index.html          # SPA (detect, analytics, arch)
-├── .github/workflows/
-│   └── deploy.yml          # CI/CD pipeline
-└── README.md
+          <span class="tag amber">Bedrock Nova Micro</span>
         </div>
       </div>
 
       <div class="author-footer">
         CS5024: Theory and Practice of Advanced AI Ecosystems<br>
-        <span>University of Limerick • April 2026 • Vivek Ranjan</span>
+        <span>University of Limerick • 2026</span>
       </div>
->>>>>>> 50738253caf4457184fb2fc80edf4325f2b1f405
     </div>
-
-    <div id="preview-wrap">
-      <img id="upload-preview" alt="preview">
-    </div>
-
-    <div class="det-row" id="det-pills"></div>
-
-    <div id="bedrock-box">
-      <span class="bedrock-label">Amazon Bedrock — Nova Micro</span>
-      <span id="bedrock-text"></span>
-    </div>
-
-    <div id="email-success">
-      <strong>📧 Email sent successfully!</strong> Check your inbox.
-    </div>
-
-    <div class="stats-row">
-      <span id="inf-time"></span>
-      <span id="det-count"></span>
-    </div>
-
-    <div class="btn-row">
-      <button id="btn-detect" onclick="detectImage()" disabled>Detect objects</button>
-      <button id="btn-email" onclick="emailResults()" disabled>📧 Email Results</button>
-      <button id="btn-clear" onclick="clearAll()">Clear</button>
-    </div>
-
-    <div id="upload-status">Enter your name and choose an image to begin</div>
   </div>
 
   <script>
     const API_URL = 'http://52.215.158.148:8000';
     
     let currentFile = null;
-    let detectionResults = null; // Store results for emailing
+    let detectionResults = null;
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('panel-' + tab).classList.add('active');
+      
+      if (tab === 'analytics') {
+        loadAnalytics();
+      }
+    }
 
     function handleDrop(e) {
       e.preventDefault();
@@ -419,7 +338,6 @@ object-detection-appv1/
         const data = await response.json();
 
         if (data.status === 'success') {
-          // Store results for emailing
           detectionResults = {
             detections: data.detections || [],
             scene_description: data.scene_description,
@@ -450,7 +368,6 @@ object-detection-appv1/
           document.getElementById('upload-status').textContent = 'Detection complete!';
           document.getElementById('upload-status').className = 'done';
           
-          // Show email button
           document.getElementById('btn-email').style.display = 'inline-block';
           document.getElementById('btn-email').disabled = false;
         } else {
@@ -474,7 +391,6 @@ object-detection-appv1/
         return;
       }
       
-      // Simple email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         alert('Please enter a valid email address');
@@ -539,6 +455,59 @@ object-detection-appv1/
       document.getElementById('upload-status').className = '';
       document.getElementById('bedrock-box').style.display = 'none';
       document.getElementById('email-success').style.display = 'none';
+    }
+
+    async function loadAnalytics() {
+      document.getElementById('analytics-status').textContent = 'Loading from DynamoDB...';
+      document.getElementById('analytics-table').style.display = 'none';
+      document.getElementById('stat-cards').innerHTML = '';
+      
+      try {
+        const response = await fetch(API_URL + '/analytics');
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        
+        const data = await response.json();
+        const records = data.records || [];
+        
+        if (records.length === 0) {
+          document.getElementById('analytics-status').textContent = 'No detections recorded yet. Upload an image to get started!';
+          return;
+        }
+        
+        const total = records.length;
+        const avgInf = (records.reduce((s, r) => s + parseFloat(r.inference_ms || 0), 0) / total).toFixed(1);
+        const avgConf = (records.reduce((s, r) => s + parseFloat(r.confidence || 0), 0) / total).toFixed(1);
+        const objCounts = {};
+        records.forEach(r => objCounts[r.object_name] = (objCounts[r.object_name] || 0) + 1);
+        const topObj = Object.entries(objCounts).sort((a, b) => b[1] - a[1])[0];
+        
+        document.getElementById('stat-cards').innerHTML = [
+          { label: 'Total detections', value: total },
+          { label: 'Unique objects', value: Object.keys(objCounts).length },
+          { label: 'Avg confidence', value: avgConf + '%' },
+          { label: 'Avg inference', value: avgInf + 'ms' },
+          { label: 'Most detected', value: topObj ? topObj[0] : '-' }
+        ].map(s => `<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value">${s.value}</div></div>`).join('');
+        
+        const tbody = document.getElementById('analytics-body');
+        tbody.innerHTML = records.map(r => {
+          const ts = r.timestamp ? r.timestamp.replace('T', ' ').substring(0, 19) : '-';
+          const conf = parseFloat(r.confidence || 0);
+          return `<tr>
+            <td>${ts}</td>
+            <td><span class="obj-pill">${r.object_name || '-'}</span></td>
+            <td><div class="conf-bar"><div class="conf-fill" style="width:${Math.round(conf)}px"></div><span>${conf.toFixed(1)}%</span></div></td>
+            <td>${parseFloat(r.inference_ms || 0).toFixed(1)}ms</td>
+            <td>${r.uploader_name || '-'}</td>
+            <td style="font-size:0.78rem;color:#9ca3af;max-width:200px">${r.scene_description || '-'}</td>
+          </tr>`;
+        }).join('');
+        
+        document.getElementById('analytics-status').textContent = '';
+        document.getElementById('analytics-table').style.display = 'table';
+      } catch(err) {
+        document.getElementById('analytics-status').textContent = 'Error loading analytics: ' + err.message;
+      }
     }
   </script>
 </body>
