@@ -102,7 +102,7 @@
         <label>Your name (required)</label>
         <input type="text" id="uploader-name" placeholder="Enter your name..." oninput="checkNameAndFile()">
       </div>
-
+     
       
 
       <div id="drop-zone"
@@ -377,64 +377,7 @@
       }
     }
 
-    async function emailResults() {
-      const emailInput = document.getElementById('uploader-email');
-      const email = emailInput.value.trim();
-      
-      if (!email) {
-        alert('Please enter your email address');
-        emailInput.focus();
-        return;
-      }
-      
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        alert('Please enter a valid email address');
-        emailInput.focus();
-        return;
-      }
-      
-      if (!detectionResults) {
-        alert('No detection results to email. Please run detection first.');
-        return;
-      }
-      
-      document.getElementById('btn-email').disabled = true;
-      document.getElementById('upload-status').textContent = 'Sending email...';
-      document.getElementById('upload-status').className = 'loading';
-      
-      try {
-        const response = await fetch(API_URL + '/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to_email: email,
-            uploader_name: detectionResults.uploader_name,
-            detections: detectionResults.detections,
-            scene_description: detectionResults.scene_description,
-            inference_ms: detectionResults.inference_ms,
-            image_url: detectionResults.image_url
-          })
-        });
-        
-        if (!response.ok) throw new Error('Failed to send email');
-        
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-          document.getElementById('email-success').style.display = 'block';
-          document.getElementById('upload-status').textContent = `Email sent to ${email}`;
-          document.getElementById('upload-status').className = 'done';
-        } else {
-          throw new Error(data.message || 'Email sending failed');
-        }
-      } catch(err) {
-        document.getElementById('upload-status').textContent = 'Email failed: ' + err.message;
-        document.getElementById('upload-status').className = 'error';
-        document.getElementById('btn-email').disabled = false;
-      }
-    }
-
+    
     function clearAll() {
       currentFile = null;
       detectionResults = null;
