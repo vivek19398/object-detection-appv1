@@ -23,9 +23,9 @@ cd backend || exit 1
 # Wait and check
 sleep 3
 if curl -f http://localhost:8000/health > /dev/null 2>&1; then
-    echo "✅ App started successfully"
+    echo "App started successfully"
 else
-    echo "❌ Failed - check app.log"
+    echo "Failed - check app.log"
     tail -20 app.log
     exit 1
 fi
