@@ -212,6 +212,6 @@ The EC2 instance role needs:
 ## Author
 
 **Vivek Ranjan** (Student ID: 25006487)
-MSc Computer Vision and AI, University of Limerick — 2026
+MEngg Computer Vision and AI, University of Limerick — 2026
 
 Module: **CS5024 — Theory and Practice of Advanced AI Ecosystems**
