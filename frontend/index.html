@@ -234,36 +234,7 @@ hr { border: 0; border-top: 1px solid #ccc; margin: 15px 0; }
 
 <!-- Architecture panel -->
 <div class="panel" id="panel-architecture">
-  <h2>System Architecture</h2>
-  <p>This object detection system uses AWS services with automated CI/CD deployment through GitHub Actions.</p>
-
-  <h3>AWS Services</h3>
-  <div class="service-card"><span class="service-name">Amazon EC2</span> - <span class="service-role">Flask API hosting</span></div>
-  <div class="service-card"><span class="service-name">Amazon S3</span> - <span class="service-role">Image storage</span></div>
-  <div class="service-card"><span class="service-name">Amazon SageMaker</span> - <span class="service-role">MobileNet v2 FPN-Lite inference</span></div>
-  <div class="service-card"><span class="service-name">Amazon DynamoDB</span> - <span class="service-role">Detection results storage</span></div>
-  <div class="service-card"><span class="service-name">Amazon Bedrock</span> - <span class="service-role">Nova Micro scene descriptions</span></div>
-  <div class="service-card"><span class="service-name">IAM Roles</span> - <span class="service-role">Secure service authentication</span></div>
-  <div class="service-card"><span class="service-name">GitHub Actions</span> - <span class="service-role">Automated CI/CD pipeline</span></div>
-
-  <h3>Technology Stack</h3>
-  <div class="tag-row">
-    <span class="tag">Python 3.10</span>
-    <span class="tag">Flask + Gunicorn</span>
-    <span class="tag">Boto3 SDK</span>
-    <span class="tag">MobileNet v2 FPN-Lite</span>
-    <span class="tag">PIL/Pillow</span>
-    <span class="tag">JavaScript ES6</span>
-    <span class="tag">GitHub Actions CI/CD</span>
-    <span class="tag">DynamoDB</span>
-    <span class="tag">Bedrock Nova Micro</span>
-  </div>
-
-  <hr>
-  <div class="footer">
-    CS5024: Theory and Practice of Advanced AI Ecosystems<br>
-    University of Limerick - 2026
-  </div>
+  <img src="architecture.png" alt="Architecture diagram" style="max-width: 100%;">
 </div>
 
 <script>
